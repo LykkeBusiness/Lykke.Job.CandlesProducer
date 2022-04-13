@@ -47,7 +47,7 @@ namespace Lykke.Job.CandlesProducer.Services
 
             try
             {
-                var factory = new ConnectionFactory { Uri = _subscriptionSettings.ConnectionString };
+                var factory = new ConnectionFactory { Uri = new Uri(_subscriptionSettings.ConnectionString) };
                 await _log.WriteInfoAsync(nameof(RabbitPoisonHandingService<T>), nameof(PutMessagesBack),
                     $"Trying to connect to {factory.Endpoint} ({_subscriptionSettings.ExchangeName})");
 
