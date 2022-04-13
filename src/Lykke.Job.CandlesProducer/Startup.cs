@@ -31,12 +31,11 @@ using Lykke.Snow.Common.Startup.Log;
 using MarginTrading.SettingsService.Contracts;
 using MarginTrading.SettingsService.Contracts.Candles;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using IApplicationLifetime = Microsoft.AspNetCore.Hosting.IApplicationLifetime;
 
 namespace Lykke.Job.CandlesProducer
 {
@@ -46,12 +45,12 @@ namespace Lykke.Job.CandlesProducer
         private IReloadingManager<AppSettings> _mtSettingsManager;
         
         private CandlesProducerSettingsContract _candlesProducerSettings;
-        private IHostEnvironment Environment { get; set; }
+        private IHostingEnvironment Environment { get; set; }
         private ILifetimeScope ApplicationContainer { get; set; }
         private IConfigurationRoot Configuration { get; }
         private ILog Log { get; set; }
 
-        public Startup(IHostEnvironment env)
+        public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -140,7 +139,7 @@ namespace Lykke.Job.CandlesProducer
         }
 
         [UsedImplicitly]
-        public void Configure(IApplicationBuilder app, IHostEnvironment env, IApplicationLifetime appLifetime)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime appLifetime)
         {
             ApplicationContainer = app.ApplicationServices.GetAutofacRoot();
             
