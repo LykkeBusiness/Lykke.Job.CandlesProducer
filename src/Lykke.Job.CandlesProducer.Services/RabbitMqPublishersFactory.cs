@@ -5,8 +5,11 @@ using System;
 using Common.Log;
 using JetBrains.Annotations;
 using Lykke.Job.CandlesProducer.Core.Services;
+using Lykke.RabbitMqBroker;
 using Lykke.RabbitMqBroker.Publisher;
-using Lykke.RabbitMqBroker.Subscriber;
+using Lykke.RabbitMqBroker.Publisher.Serializers;
+using Lykke.RabbitMqBroker.Publisher.Strategies;
+using Microsoft.Extensions.Logging;
 
 namespace Lykke.Job.CandlesProducer.Services
 {
@@ -14,10 +17,12 @@ namespace Lykke.Job.CandlesProducer.Services
     public class RabbitMqPublishersFactory : IRabbitMqPublishersFactory
     {
         private readonly ILog _log;
+        private readonly ILoggerFactory _loggerFactory;
 
-        public RabbitMqPublishersFactory(ILog log)
+        public RabbitMqPublishersFactory(ILog log, ILoggerFactory loggerFactory)
         {
             _log = log;
+            _loggerFactory = loggerFactory;
         }
 
         public RabbitMqPublisher<TMessage> Create<TMessage>(
@@ -32,12 +37,12 @@ namespace Lykke.Job.CandlesProducer.Services
                     .CreateForPublisher(connectionString, @namespace, endpoint)
                     .MakeDurable();
 
-                return new RabbitMqPublisher<TMessage>(settings)
+                var result = new RabbitMqPublisher<TMessage>(_loggerFactory, settings)
                     .SetSerializer(serializer)
                     .SetPublishStrategy(new DefaultFanoutPublishStrategy(settings))
-                    .PublishSynchronously()
-                    .SetLogger(_log)
-                    .Start();
+                    .PublishSynchronously();
+                result.Start();
+                return result;
             }
             catch (Exception ex)
             {

@@ -4,12 +4,13 @@
 using System;
 using System.Threading.Tasks;
 using Common;
+using Lykke.RabbitMqBroker;
 using Lykke.RabbitMqBroker.Subscriber;
 
 namespace Lykke.Job.CandlesProducer.Core.Services
 {
     public interface IRabbitMqSubscribersFactory
     {
-        IStopable Create<TMessage>(RabbitMqSubscriptionSettings settings, Func<TMessage, Task> handler);
+        IStartStop Create<TMessage>(RabbitMqSubscriptionSettings settings, Func<TMessage, Task> handler);
     }
 }

@@ -12,6 +12,7 @@ using Lykke.Job.CandlesProducer.Core.Services.Candles;
 using Lykke.Job.CandlesProducer.Core.Services.Quotes;
 using Lykke.Job.CandlesProducer.Services.Helpers;
 using Lykke.Job.QuotesProducer.Contract;
+using Lykke.RabbitMqBroker;
 using Lykke.RabbitMqBroker.Subscriber;
 
 namespace Lykke.Job.CandlesProducer.Services.Quotes.Spot
@@ -23,7 +24,7 @@ namespace Lykke.Job.CandlesProducer.Services.Quotes.Spot
         private readonly IRabbitMqSubscribersFactory _subscribersFactory;
         private readonly string _connectionString;
 
-        private IStopable _subscriber;
+        private IStartStop _subscriber;
 
         public SpotQuotesSubscriber(ILog log, ICandlesManager candlesManager, IRabbitMqSubscribersFactory subscribersFactory, string connectionString)
         {

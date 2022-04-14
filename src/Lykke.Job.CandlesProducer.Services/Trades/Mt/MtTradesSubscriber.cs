@@ -13,6 +13,7 @@ using Lykke.Job.CandlesProducer.Core.Services.Candles;
 using Lykke.Job.CandlesProducer.Core.Services.Trades;
 using Lykke.Job.CandlesProducer.Services.Helpers;
 using Lykke.Job.CandlesProducer.Services.Trades.Mt.Messages;
+using Lykke.RabbitMqBroker;
 using Lykke.RabbitMqBroker.Subscriber;
 
 namespace Lykke.Job.CandlesProducer.Services.Trades.Mt
@@ -25,7 +26,7 @@ namespace Lykke.Job.CandlesProducer.Services.Trades.Mt
         private readonly IRabbitMqSubscribersFactory _subscribersFactory;
         private readonly string _connectionString;
         private readonly bool _isEnabled;
-        private IStopable _tradesSubscriber;
+        private IStartStop _tradesSubscriber;
 
         public MtTradesSubscriber(ILog log,
             ICandlesManager candlesManager,
