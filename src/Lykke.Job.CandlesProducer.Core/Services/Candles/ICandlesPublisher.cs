@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using Autofac;
 using Common;
 using Lykke.Job.CandlesProducer.Core.Domain.Candles;
+using Lykke.RabbitMqBroker;
 
 namespace Lykke.Job.CandlesProducer.Core.Services.Candles
 {
-    public interface ICandlesPublisher : IStartable, IStopable
+    public interface ICandlesPublisher : IStartStop
     {
         string ShardName { get; }
         Task PublishAsync(IReadOnlyCollection<CandleUpdateResult> updates);

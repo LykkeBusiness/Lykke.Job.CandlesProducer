@@ -14,6 +14,7 @@ using Lykke.Job.CandlesProducer.Core.Services.Candles;
 using Lykke.Job.CandlesProducer.Core.Services.Trades;
 using Lykke.Job.CandlesProducer.Services.Helpers;
 using Lykke.Job.CandlesProducer.Services.Trades.Spot.Messages;
+using Lykke.RabbitMqBroker;
 using Lykke.RabbitMqBroker.Subscriber;
 
 namespace Lykke.Job.CandlesProducer.Services.Trades.Spot
@@ -26,7 +27,7 @@ namespace Lykke.Job.CandlesProducer.Services.Trades.Spot
         private readonly IRabbitMqSubscribersFactory _subscribersFactory;
         private readonly IRabbitSubscriptionSettings _tradesSubscriptionSettings;
         private readonly IAssetPairsManager _assetPairsManager;
-        private IStopable _limitTradesSubscriber;
+        private IStartStop _limitTradesSubscriber;
 
         public SpotTradesSubscriber(
             ILog log,

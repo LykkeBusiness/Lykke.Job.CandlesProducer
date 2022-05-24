@@ -13,6 +13,7 @@ using Lykke.Job.CandlesProducer.Core.Services.Candles;
 using Lykke.Job.CandlesProducer.Core.Services.Quotes;
 using Lykke.Job.CandlesProducer.Services.Helpers;
 using Lykke.Job.CandlesProducer.Services.Quotes.Mt.Messages;
+using Lykke.RabbitMqBroker;
 using Lykke.RabbitMqBroker.Subscriber;
 
 namespace Lykke.Job.CandlesProducer.Services.Quotes.Mt
@@ -25,7 +26,7 @@ namespace Lykke.Job.CandlesProducer.Services.Quotes.Mt
         private readonly string _connectionString;
         private readonly bool _skipEodQuote;
 
-        private IStopable _subscriber;
+        private IStartStop _subscriber;
 
         public MtQuotesSubscriber(ILog log, ICandlesManager candlesManager, 
             IRabbitMqSubscribersFactory subscribersFactory, string connectionString, bool skipEodQuote)
