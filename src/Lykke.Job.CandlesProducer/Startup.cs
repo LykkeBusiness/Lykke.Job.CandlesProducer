@@ -45,12 +45,12 @@ namespace Lykke.Job.CandlesProducer
         private IReloadingManager<AppSettings> _mtSettingsManager;
         
         private CandlesProducerSettingsContract _candlesProducerSettings;
-        private IHostingEnvironment Environment { get; set; }
+        private IWebHostEnvironment Environment { get; set; }
         private ILifetimeScope ApplicationContainer { get; set; }
         private IConfigurationRoot Configuration { get; }
         private ILog Log { get; set; }
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
