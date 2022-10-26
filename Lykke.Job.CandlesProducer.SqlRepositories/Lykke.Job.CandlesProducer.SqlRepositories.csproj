@@ -10,7 +10,7 @@
     <PackageReference Include="Lykke.Logs" Version="7.4.0" />
     <PackageReference Include="Lykke.Logs.MsSql" Version="2.2.0" />
     <PackageReference Include="MessagePack" Version="1.9.11" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.1.1" />
   </ItemGroup>
 
   <ItemGroup>
