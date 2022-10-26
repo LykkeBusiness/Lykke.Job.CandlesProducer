@@ -37,6 +37,7 @@ using Lykke.Job.CandlesProducer.Services.Trades.Mt.Messages;
 using Lykke.Job.QuotesProducer.Contract;
 using Lykke.Job.CandlesProducer.Services.Quotes.Mt.Messages;
 using Lykke.Job.CandlesProducer.Services.Trades;
+using Lykke.Middlewares.Mappers;
 
 namespace Lykke.Job.CandlesProducer.Modules
 {
@@ -68,6 +69,10 @@ namespace Lykke.Job.CandlesProducer.Modules
             builder.RegisterInstance(_log).As<ILog>().SingleInstance();
 
             builder.RegisterType<HealthService>().As<IHealthService>().SingleInstance();
+            
+            builder.RegisterType<DefaultHttpStatusCodeMapper>().As<IHttpStatusCodeMapper>().SingleInstance();
+            
+            builder.RegisterType<DefaultLogLevelMapper>().As<ILogLevelMapper>().SingleInstance();
 
             RegisterResourceMonitor(builder);
 

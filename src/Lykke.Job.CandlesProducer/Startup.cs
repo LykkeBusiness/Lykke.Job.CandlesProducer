@@ -9,13 +9,10 @@ using Autofac.Extensions.DependencyInjection;
 using AzureStorage.Tables;
 using Common.Log;
 using JetBrains.Annotations;
-using Lykke.Common.ApiLibrary.Middleware;
-using Lykke.Common.ApiLibrary.Swagger;
 using Lykke.HttpClientGenerator.Infrastructure;
 using Lykke.Job.CandlesProducer.Core.Domain;
 using Lykke.Job.CandlesProducer.Core.Domain.Candles;
 using Lykke.Job.CandlesProducer.Core.Services;
-using Lykke.Job.CandlesProducer.Models;
 using Lykke.Job.CandlesProducer.Modules;
 using Lykke.Job.CandlesProducer.Services.Assets;
 using Lykke.Job.CandlesProducer.Settings;
@@ -24,6 +21,7 @@ using Lykke.Logs.MsSql;
 using Lykke.Logs.MsSql.Repositories;
 using Lykke.Logs.Serilog;
 using Lykke.Logs.Slack;
+using Lykke.Middlewares;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.Snow.Common.Startup.Hosting;
@@ -32,6 +30,7 @@ using MarginTrading.SettingsService.Contracts;
 using MarginTrading.SettingsService.Contracts.Candles;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -45,12 +44,12 @@ namespace Lykke.Job.CandlesProducer
         private IReloadingManager<AppSettings> _mtSettingsManager;
         
         private CandlesProducerSettingsContract _candlesProducerSettings;
-        private IHostingEnvironment Environment { get; set; }
+        private IWebHostEnvironment Environment { get; set; }
         private ILifetimeScope ApplicationContainer { get; set; }
         private IConfigurationRoot Configuration { get; }
         private ILog Log { get; set; }
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -74,7 +73,7 @@ namespace Lykke.Job.CandlesProducer
 
             services.AddSwaggerGen(options =>
             {
-                options.DefaultLykkeConfiguration("v1", "CandlesProducer API");
+                options.SwaggerDoc("v1", new OpenApiInfo{Title = "CandlesProducer API", Version = "v1"});
             });
             
             LoadConfiguration();
@@ -147,8 +146,14 @@ namespace Lykke.Job.CandlesProducer
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseLykkeMiddleware("CandlesProducer", ex => new ErrorResponse { ErrorMessage = "Technical problem" });
+            
+            app.Use(async (context, next) =>
+            {
+                context.Request.EnableBuffering();
+                await next();
+            });
+            
+            app.UseMiddleware<ExceptionHandlerMiddleware>();
 
             app.UseRouting();
             app.UseEndpoints(endpoints => {
