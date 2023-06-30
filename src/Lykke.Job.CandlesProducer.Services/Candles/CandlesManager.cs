@@ -215,6 +215,63 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
             }
         }
 
+        public async Task UpdateRFactor(string assetPair, double rFactor)
+        {
+            var asset = await _assetPairsManager.TryGetEnabledPairAsync(assetPair);
+
+            if (asset == null)
+            {
+                return;
+            }
+
+            var timestamp = DateTime.UtcNow;
+            var changedUpdates = new ConcurrentBag<CandleUpdateResult>();
+            var candles = _candlesGenerator.GetState()
+                    .Values
+                    .Where(x => x.AssetPairId == assetPair)
+                    .ToList();
+
+            try
+            {
+                // Updates all intervals in parallel
+
+                var processingTasks = candles
+                    .Select(candle => Task.Factory.StartNew(() =>
+                    {
+                        var candleUpdateResult = _candlesGenerator.UpdateRFactor(
+                            candle,
+                            timestamp,
+                            rFactor);
+
+                        if (candleUpdateResult.WasChanged)
+                        {
+                            changedUpdates.Add(candleUpdateResult);
+                        }
+                    }));
+
+                await Task.WhenAll(processingTasks);
+
+                // Publishes updated candles
+
+                if (!changedUpdates.IsEmpty)
+                {
+                    var publisher = await _candlesPublisherProvider.GetForAssetPair(assetPair);
+                    await publisher.PublishAsync(changedUpdates);
+                }
+            }
+            catch (Exception)
+            {
+                // Failed to publish one or several candles, so processing should be cancelled
+
+                foreach (var updateResult in changedUpdates)
+                {
+                    _candlesGenerator.Undo(updateResult);
+                }
+
+                throw;
+            }
+        }
+
         private void ProcessQuoteInterval(
             string assetPair,
             DateTime timestamp,

@@ -13,5 +13,6 @@ namespace Lykke.Job.CandlesProducer.Core.Services.Candles
         Task ProcessMtQuoteAsync(MtQuoteDto mtQuote);
         Task ProcessSpotQuoteAsync(QuoteMessage quote);
         Task ProcessTradeAsync(Trade trade);
+        Task UpdateRFactor(string assetPair, double rFactor);
     }
 }

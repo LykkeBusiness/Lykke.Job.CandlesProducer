@@ -128,6 +128,33 @@ namespace Lykke.Job.CandlesProducer.Core.Domain.Candles
             );
         }
 
+        public Candle UpdateRFactor(DateTime timestamp, double rFactor)
+        {
+            if (rFactor <= 0)
+            {
+                throw new ArgumentException("R-factor should be greater than 0.");
+            }
+
+            if (timestamp < LatestChangeTimestamp)
+            {
+                throw new ArgumentException("Timestamp shouldn't be less than LatestChangeTimestamp.");
+            }
+
+            return new Candle(
+                AssetPairId,
+                PriceType,
+                TimeInterval,
+                Timestamp,
+                timestamp,
+                OpenTimestamp,
+                Open * rFactor,
+                Close * rFactor,
+                Low * rFactor,
+                High * rFactor,
+                TradingVolume,
+                TradingOppositeVolume);
+        }
+
         public Candle UpdateQuotingCandle(DateTime timestamp, double price)
         {
             if (PriceType != CandlePriceType.Ask &&
