@@ -21,7 +21,7 @@ namespace Lykke.Job.CandlesProducer.Controllers
             _candlesManager = candlesManager;
         }
 
-        [HttpPut("update")]
+        [HttpPut]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
