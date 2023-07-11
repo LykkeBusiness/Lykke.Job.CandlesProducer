@@ -10,6 +10,7 @@ namespace Lykke.Job.CandlesProducer.Core.Services.Candles
 {
     public interface ICandlesGenerator : IHaveState<ImmutableDictionary<string, ICandle>>
     {
+        CandleUpdateResult UpdateRFactor(ICandle candle, DateTime timestamp, double rFactor);
         CandleUpdateResult UpdateQuotingCandle(string assetPair, DateTime timestamp, double price, CandlePriceType priceType, CandleTimeInterval timeInterval);
         CandleUpdateResult UpdateTradingCandle(string assetPair, DateTime timestamp, double tradePrice, double baseTradingVolume, double quotingTradingVolume, CandleTimeInterval timeInterval);
         void Undo(CandleUpdateResult candleUpdateResult);
