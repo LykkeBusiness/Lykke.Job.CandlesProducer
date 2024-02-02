@@ -1,3 +1,5 @@
+[![.NET](https://github.com/LykkeBusiness/Lykke.Job.CandlesProducer/actions/workflows/main.yml/badge.svg)](https://github.com/LykkeBusiness/Lykke.Job.CandlesProducer/actions/workflows/main.yml)
+
 # Lykke.Job.CandlesProducer
 
 ## Description
