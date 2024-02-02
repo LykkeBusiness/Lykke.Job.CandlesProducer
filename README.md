@@ -1,4 +1,4 @@
-[![.NET](https://github.com/LykkeBusiness/Lykke.Job.CandlesProducer/actions/workflows/buil.yml/badge.svg)](https://github.com/LykkeBusiness/Lykke.Job.CandlesProducer/actions/workflows/build.yml)
+[![.NET](https://github.com/LykkeBusiness/Lykke.Job.CandlesProducer/actions/workflows/build.yml/badge.svg)](https://github.com/LykkeBusiness/Lykke.Job.CandlesProducer/actions/workflows/build.yml)
 
 # Lykke.Job.CandlesProducer
 
