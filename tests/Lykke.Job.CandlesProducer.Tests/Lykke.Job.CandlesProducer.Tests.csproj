@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
     <AspNetCoreModuleName>AspNetCoreModuleV2</AspNetCoreModuleName>
+    <Version>2.4.0</Version>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
