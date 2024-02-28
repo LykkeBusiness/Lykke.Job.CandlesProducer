@@ -1,3 +1,11 @@
+## 2.5.0 - Nova 2. Delivery 40 (February 28, 2024)
+### What's changed
+* LT-5291: Step: update version number is failed.
+* LT-5201: Update lykke.httpclientgenerator to 5.6.2.
+
+
+
+
 ## 2.4.0 - Nova 2. Delivery 39 (January 29, 2024)
 ### What's changed
 * LT-5170: Add history of releases into `changelog.md`
