@@ -8,7 +8,6 @@ using Common.Log;
 using Lykke.Job.CandlesProducer.Core.Services;
 using Lykke.Job.CandlesProducer.Core.Services.Candles;
 using Lykke.Job.CandlesProducer.Core.Services.Quotes;
-using Lykke.Job.CandlesProducer.Core.Services.Trades;
 
 namespace Lykke.Job.CandlesProducer.Services
 {
@@ -16,8 +15,6 @@ namespace Lykke.Job.CandlesProducer.Services
 
     public class StartupManager : IStartupManager
     {
-        private readonly IQuotesSubscriber _quotesSubscriber;
-        private readonly ITradesSubscriber _tradesSubscriber;
         private readonly IEnumerable<ICandlesPublisher> _candlesPublishers;
         private readonly IEnumerable<ISnapshotSerializer> _snapshotSerializers;
         private readonly IDefaultCandlesPublisher _defaultCandlesPublisher;
@@ -25,14 +22,11 @@ namespace Lykke.Job.CandlesProducer.Services
 
         public StartupManager(
             IQuotesSubscriber quotesSubscriber,
-            ITradesSubscriber tradesSubscriber,
             IEnumerable<ISnapshotSerializer> snapshotSerializers,
             IEnumerable<ICandlesPublisher> candlesPublishers,
             IDefaultCandlesPublisher defaultCandlesPublisher,
             ILog log)
         {
-            _quotesSubscriber = quotesSubscriber;
-            _tradesSubscriber = tradesSubscriber;
             _candlesPublishers = candlesPublishers;
             _snapshotSerializers = snapshotSerializers;
             _defaultCandlesPublisher = defaultCandlesPublisher;
@@ -57,14 +51,6 @@ namespace Lykke.Job.CandlesProducer.Services
             await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Waiting for snapshots async...");
 
             await Task.WhenAll(snapshotTasks);
-
-            await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Starting quotes subscriber...");
-
-            _quotesSubscriber.Start();
-
-            await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Starting trades subscriber...");
-
-            _tradesSubscriber.Start();
 
             await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Started up");
         }

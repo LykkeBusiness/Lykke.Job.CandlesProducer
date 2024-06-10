@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Lykke.MarginTrading.SettingsService.Contracts" Version="1.5.0" />
-    <PackageReference Include="LykkeBiz.RabbitMqBroker" Version="9.2.6" />
+    <PackageReference Include="LykkeBiz.RabbitMqBroker" Version="13.5.0" />
   </ItemGroup>
 
   <ItemGroup>

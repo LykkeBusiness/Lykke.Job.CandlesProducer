@@ -24,7 +24,6 @@ namespace Lykke.Job.CandlesProducer.Services.Trades.Spot
     {
         private readonly ILog _log;
         private readonly ICandlesManager _candlesManager;
-        private readonly IRabbitMqSubscribersFactory _subscribersFactory;
         private readonly IRabbitSubscriptionSettings _tradesSubscriptionSettings;
         private readonly IAssetPairsManager _assetPairsManager;
         private IStartStop _limitTradesSubscriber;
@@ -32,14 +31,12 @@ namespace Lykke.Job.CandlesProducer.Services.Trades.Spot
         public SpotTradesSubscriber(
             ILog log,
             ICandlesManager candlesManager, 
-            IRabbitMqSubscribersFactory subscribersFactory, 
             IRabbitSubscriptionSettings tradesSubscriptionSettings,
             IAssetPairsManager assetPairsManager)
         {
             _log = log?.CreateComponentScope(nameof(SpotTradesSubscriber)) ??
                    throw new ArgumentNullException(nameof(log));
             _candlesManager = candlesManager ?? throw new ArgumentNullException(nameof(candlesManager));
-            _subscribersFactory = subscribersFactory ?? throw new ArgumentNullException(nameof(_subscribersFactory));
             _tradesSubscriptionSettings = tradesSubscriptionSettings ?? throw new ArgumentNullException(nameof(_tradesSubscriptionSettings));
             _assetPairsManager = assetPairsManager ?? throw new ArgumentNullException(nameof(_assetPairsManager));
         }
@@ -59,7 +56,7 @@ namespace Lykke.Job.CandlesProducer.Services.Trades.Spot
 
         public void Start()
         {
-            _limitTradesSubscriber = _subscribersFactory.Create<LimitOrdersMessage>(SubscriptionSettings, ProcessLimitTradesAsync);
+            //_limitTradesSubscriber = _subscribersFactory.Create<LimitOrdersMessage>(SubscriptionSettings, ProcessLimitTradesAsync);
         }
 
         private async Task ProcessLimitTradesAsync(LimitOrdersMessage message)

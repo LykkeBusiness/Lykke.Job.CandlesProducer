@@ -21,16 +21,14 @@ namespace Lykke.Job.CandlesProducer.Services.Quotes.Spot
     {
         private readonly ILog _log;
         private readonly ICandlesManager _candlesManager;
-        private readonly IRabbitMqSubscribersFactory _subscribersFactory;
         private readonly string _connectionString;
 
         private IStartStop _subscriber;
 
-        public SpotQuotesSubscriber(ILog log, ICandlesManager candlesManager, IRabbitMqSubscribersFactory subscribersFactory, string connectionString)
+        public SpotQuotesSubscriber(ILog log, ICandlesManager candlesManager, string connectionString)
         {
             _log = log;
             _candlesManager = candlesManager;
-            _subscribersFactory = subscribersFactory;
             _connectionString = connectionString;
         }
 
@@ -49,7 +47,7 @@ namespace Lykke.Job.CandlesProducer.Services.Quotes.Spot
 
         public void Start()
         {
-            _subscriber = _subscribersFactory.Create<QuoteMessage>(SubscriptionSettings, ProcessQuoteAsync);
+            //_subscriber = _subscribersFactory.Create<QuoteMessage>(SubscriptionSettings, ProcessQuoteAsync);
         }
 
         public void Stop()

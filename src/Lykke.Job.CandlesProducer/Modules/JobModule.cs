@@ -29,6 +29,7 @@ using Lykke.SettingsReader;
 using Microsoft.Extensions.DependencyInjection;
 using MarginTrading.SettingsService.Contracts;
 using Lykke.HttpClientGenerator;
+using Lykke.Job.CandlesProducer.Services.Helpers;
 using Lykke.Job.CandlesProducer.SqlRepositories;
 using Lykke.Service.Assets.Client.Custom;
 using AssetsSettings = Lykke.Job.CandlesProducer.Settings.AssetsSettings;
@@ -38,6 +39,10 @@ using Lykke.Job.QuotesProducer.Contract;
 using Lykke.Job.CandlesProducer.Services.Quotes.Mt.Messages;
 using Lykke.Job.CandlesProducer.Services.Trades;
 using Lykke.Middlewares.Mappers;
+using Lykke.RabbitMqBroker;
+using Lykke.RabbitMqBroker.Subscriber;
+using Lykke.RabbitMqBroker.Subscriber.Middleware.ErrorHandling;
+using Microsoft.Extensions.Logging;
 
 namespace Lykke.Job.CandlesProducer.Modules
 {
@@ -147,9 +152,10 @@ namespace Lykke.Job.CandlesProducer.Modules
 
             builder.RegisterType<ShutdownManager>()
                 .As<IShutdownManager>();
+            
+            _services.AddRabbitMqConnectionProvider();
 
-            builder.RegisterType<RabbitMqSubscribersFactory>()
-                .As<IRabbitMqSubscribersFactory>();
+            _services.AddSingleton(new SkipEodQuote(_settings.SkipEodQuote));
 
             // Optionally loading quotes subscriber if it is present in settings...
             if (_settings.Rabbit.QuotesSubscribtion != null)
@@ -178,11 +184,29 @@ namespace Lykke.Job.CandlesProducer.Modules
                     _services.AddSingleton<IQuotesPoisonHandingService>(provider => new QuotesPoisonHandingService<MtQuoteMessage>(
                         provider.GetService<IRabbitPoisonHandingService<MtQuoteMessage>>()));
 
-                    builder.RegisterType<MtQuotesSubscriber>()
-                        .As<IQuotesSubscriber>()
-                        .SingleInstance()
-                        .WithParameter(TypedParameter.From(_settings.Rabbit.QuotesSubscribtion))
-                        .WithParameter(TypedParameter.From(_settings.SkipEodQuote));
+                    _services.AddRabbitMqListener<MtQuoteMessage, MtQuotesHandler>(
+                        RabbitMqSubscriptionSettingsHelper.GetSubscriptionSettings(
+                            _settings.Rabbit.QuotesSubscribtion,
+                            "lykke.mt",
+                            "pricefeed"),
+                        opt =>
+                        {
+                            opt.SerializationFormat = SerializationFormat.Json;
+                            opt.ShareConnection = true;
+                            opt.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
+                        },
+                        (s, p) =>
+                        {
+                            var loggerFactory = p.GetService<ILoggerFactory>();
+                            s.UseMiddleware(
+                                    new DeadQueueMiddleware<MtQuoteMessage>(
+                                        loggerFactory.CreateLogger<DeadQueueMiddleware<MtQuoteMessage>>()))
+                                .UseMiddleware(
+                                    new ResilientErrorHandlingMiddleware<MtQuoteMessage>(
+                                        loggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<MtQuoteMessage>>(),
+                                        TimeSpan.FromSeconds(10),
+                                        10));
+                        });
                 }
             }
             else
@@ -222,11 +246,26 @@ namespace Lykke.Job.CandlesProducer.Modules
                 _services.AddSingleton<ITradesPoisonHandingService>(provider => new TradesPoisonHandingService<MtTradeMessage>(
                     provider.GetService<IRabbitPoisonHandingService<MtTradeMessage>>()));
 
-                builder.RegisterType<MtTradesSubscriber>()
-                    .As<ITradesSubscriber>()
-                    .SingleInstance()
-                    .WithParameter(TypedParameter.From(_settings.Rabbit.TradesSubscription.ConnectionString))
-                    .WithParameter(TypedParameter.From(_settings.CandlesGenerator.GenerateTrades));
+                if (_settings.CandlesGenerator.GenerateTrades)
+                {
+                    _services.AddRabbitMqListener<MtTradeMessage, MtTradesHandler>(
+                        RabbitMqSubscriptionSettingsHelper.GetSubscriptionSettings(
+                            _settings.Rabbit.TradesSubscription.ConnectionString, "lykke.mt", "trades", "-v2"),
+                        opt =>
+                        {
+                            opt.SerializationFormat = SerializationFormat.Json;
+                            opt.ShareConnection = true;
+                            opt.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
+                        }, (s, p) =>
+                        {
+                            var loggerFactory = p.GetService<ILoggerFactory>();
+                            s.UseMiddleware(new DeadQueueMiddleware<MtTradeMessage>(
+                                    loggerFactory.CreateLogger<DeadQueueMiddleware<MtTradeMessage>>()))
+                                .UseMiddleware(new ResilientErrorHandlingMiddleware<MtTradeMessage>(
+                                    loggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<MtTradeMessage>>(),
+                                    TimeSpan.FromSeconds(10), 10));
+                        });
+                }
             }
 
             builder.RegisterType<MidPriceQuoteGenerator>()

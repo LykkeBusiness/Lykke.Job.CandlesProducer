@@ -93,15 +93,18 @@ namespace Lykke.Job.CandlesProducer.Services
                 var consumer = new EventingBasicConsumer(subscriptionChannel);
                 consumer.Received += (ch, ea) =>
                 {
-                    var message = RepackMessage(ea.Body);
+                    var message = RepackMessage(ea.Body.ToArray());
 
                     if (message != null)
                     {
                         try
                         {
-                            var properties = !string.IsNullOrEmpty(_subscriptionSettings.RoutingKey)
-                                ? new BasicProperties { Type = _subscriptionSettings.RoutingKey }
-                                : null;
+                            IBasicProperties properties = null;
+                            if (!string.IsNullOrEmpty(_subscriptionSettings.RoutingKey))
+                            {
+                                properties = publishingChannel.CreateBasicProperties();
+                                properties.Type = _subscriptionSettings.RoutingKey;
+                            }
 
                             publishingChannel.BasicPublish(_subscriptionSettings.ExchangeName,
                                 _subscriptionSettings.RoutingKey ?? "", properties, message);
