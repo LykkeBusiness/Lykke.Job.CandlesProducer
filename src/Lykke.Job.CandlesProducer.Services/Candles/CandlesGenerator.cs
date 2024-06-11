@@ -36,11 +36,11 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
             return Update(candle.AssetPairId, timestamp, candle.PriceType, candle.TimeInterval,
                 createNewCandle: () => Candle.Copy(candle).UpdateRFactor(timestamp, rFactor),
                 updateCandle: oldCandle => oldCandle.UpdateRFactor(timestamp, rFactor),
-                getLoggingContext: candle => new
+                getLoggingContext: c => new
                 {
-                    candle = candle,
-                    timestamp = timestamp,
-                    rFactor = rFactor
+                    candle = c,
+                    timestamp,
+                    rFactor
                 });
         }
 
@@ -52,11 +52,11 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
                 updateCandle: oldCandle => oldCandle.UpdateQuotingCandle(timestamp, price),
                 getLoggingContext: candle => new
                 {
-                    assetPair = assetPair,
-                    timestamp = timestamp,
-                    price = price,
-                    priceType = priceType,
-                    timeInterval = timeInterval
+                    assetPair,
+                    timestamp,
+                    price,
+                    priceType,
+                    timeInterval
                 });
         }
 
@@ -67,12 +67,12 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
                 updateCandle: oldCandle => oldCandle.UpdateTradingCandle(timestamp, tradePrice, baseTradingVolume, quotingTradingVolume),
                 getLoggingContext: candle => new
                 {
-                    assetPair = assetPair,
-                    timestamp = timestamp,
-                    tradePrice = tradePrice,
-                    baseTradingVolume = baseTradingVolume,
-                    quotingTradingVolume = quotingTradingVolume,
-                    timeInterval = timeInterval
+                    assetPair,
+                    timestamp,
+                    tradePrice,
+                    baseTradingVolume,
+                    quotingTradingVolume,
+                    timeInterval
                 });
         }
         

@@ -64,7 +64,7 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
         {
             var @event = new CandlesUpdatedEvent
             {
-                ContractVersion = Contract.Constants.ContractVersion,
+                ContractVersion = Constants.ContractVersion,
                 UpdateTimestamp = DateTime.UtcNow,
                 Candles = updates
                     .Select(c => new CandleUpdate

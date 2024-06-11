@@ -13,7 +13,7 @@ using RabbitMQ.Client.Events;
 
 namespace Lykke.Job.CandlesProducer.Services
 {
-    public class RabbitPoisonHandingService<T> : IRabbitPoisonHandingService<T>, IDisposable where T : class
+    public class RabbitPoisonHandingService<T> : IRabbitPoisonHandingService, IDisposable where T : class
     {
         private readonly ILog _log;
         private readonly RabbitMqSubscriptionSettings _subscriptionSettings;
@@ -66,7 +66,7 @@ namespace Lykke.Job.CandlesProducer.Services
 
                 var messagesFound = subscriptionChannel.MessageCount(PoisonQueueName);
                 var processedMessages = 0;
-                var result = "Undefined";
+                string result;
 
                 if (messagesFound == 0)
                 {

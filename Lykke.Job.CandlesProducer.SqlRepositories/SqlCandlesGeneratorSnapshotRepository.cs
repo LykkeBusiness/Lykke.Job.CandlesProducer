@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Lykke.Job.CandlesProducer.AzureRepositories;
 using Lykke.Job.CandlesProducer.Core.Domain;
 using Lykke.Job.CandlesProducer.Core.Domain.Candles;
-using MarginTrading.SqlRepositories;
 
 namespace Lykke.Job.CandlesProducer.SqlRepositories
 {
@@ -23,14 +22,15 @@ namespace Lykke.Job.CandlesProducer.SqlRepositories
             _blobRepository = new SqlBlobRepository(connectionString);
         }
 
-        public async Task<ImmutableDictionary<string, ICandle>> TryGetAsync()
+        public Task<ImmutableDictionary<string, ICandle>> TryGetAsync()
         {
             var model = _blobRepository.Read<Dictionary<string, CandleEntity>>(BlobContainer, Key);
             if (model != null)
             {
-                return model.ToImmutableDictionary(i => i.Key, i => (ICandle)i.Value);
+                return Task.FromResult(model.ToImmutableDictionary(i => i.Key, i => (ICandle)i.Value));
             }
-            return new Dictionary<string,ICandle>().ToImmutableDictionary();
+
+            return Task.FromResult(new Dictionary<string, ICandle>().ToImmutableDictionary());
         }
 
         public async Task SaveAsync(ImmutableDictionary<string, ICandle> state)
