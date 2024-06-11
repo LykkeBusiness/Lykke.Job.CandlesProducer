@@ -101,7 +101,10 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
 
         public void SetState(ImmutableDictionary<string, ICandle> state)
         {
-            if (_candles.Count > 0)
+            if (state?.IsEmpty ?? true)
+                return;
+            
+            if (!_candles.IsEmpty)
             {
                 throw new InvalidOperationException("Candles generator state already not empty");
             }
