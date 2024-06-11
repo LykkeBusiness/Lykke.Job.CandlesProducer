@@ -15,7 +15,6 @@ using Lykke.Job.CandlesProducer.Core.Services;
 using Lykke.Job.CandlesProducer.Core.Services.Assets;
 using Lykke.Job.CandlesProducer.Core.Services.Candles;
 using Lykke.Job.CandlesProducer.Core.Services.Quotes;
-using Lykke.Job.CandlesProducer.Core.Services.Trades;
 using Lykke.Job.CandlesProducer.Services;
 using Lykke.Job.CandlesProducer.Services.Assets;
 using Lykke.Job.CandlesProducer.Services.Candles;
@@ -225,23 +224,53 @@ namespace Lykke.Job.CandlesProducer.Modules
 
             if (_quotesSourceType == QuotesSourceType.Spot)
             {
-                _services.AddSingleton<IRabbitPoisonHandingService<LimitOrdersMessage>>(provider => new RabbitPoisonHandingService<LimitOrdersMessage>(
-                    provider.GetService<ILog>(),
-                    provider.GetService<ITradesSubscriber>().SubscriptionSettings));
+                var subscriptionSettings = RabbitMqSubscriptionSettingsHelper.GetSubscriptionSettings(
+                    _settings.Rabbit.TradesSubscription.ConnectionString,
+                    "lykke",
+                    "limitorders.clients",
+                    "-v2");
+                
+                _services.AddSingleton<IRabbitPoisonHandingService<LimitOrdersMessage>>(
+                    provider => new RabbitPoisonHandingService<LimitOrdersMessage>(
+                        provider.GetService<ILog>(),
+                        subscriptionSettings));
 
-                _services.AddSingleton<ITradesPoisonHandingService>(provider => new TradesPoisonHandingService<LimitOrdersMessage>(
-                    provider.GetService<IRabbitPoisonHandingService<LimitOrdersMessage>>()));
+                _services.AddSingleton<ITradesPoisonHandingService>(
+                    provider => new TradesPoisonHandingService<LimitOrdersMessage>(
+                        provider.GetService<IRabbitPoisonHandingService<LimitOrdersMessage>>()));
 
-                builder.RegisterType<SpotTradesSubscriber>()
-                    .As<ITradesSubscriber>()
-                    .SingleInstance()
-                    .WithParameter(TypedParameter.From<IRabbitSubscriptionSettings>(_settings.Rabbit.TradesSubscription));
+                _services.AddRabbitMqListener<LimitOrdersMessage, SpotTradesHandler>(
+                    subscriptionSettings,
+                    opt =>
+                    {
+                        opt.SerializationFormat = SerializationFormat.Json;
+                        opt.ShareConnection = true;
+                        opt.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
+                    },
+                    (s, p) =>
+                    {
+                        var loggerFactory = p.GetService<ILoggerFactory>();
+                        s.UseMiddleware(
+                                new DeadQueueMiddleware<LimitOrdersMessage>(
+                                    loggerFactory.CreateLogger<DeadQueueMiddleware<LimitOrdersMessage>>()))
+                            .UseMiddleware(
+                                new ResilientErrorHandlingMiddleware<LimitOrdersMessage>(
+                                    loggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<LimitOrdersMessage>>(),
+                                    TimeSpan.FromSeconds(10),
+                                    10));
+                    });
             }
             else
             {
+                var subscriptionSettings = RabbitMqSubscriptionSettingsHelper.GetSubscriptionSettings(
+                    _settings.Rabbit.TradesSubscription.ConnectionString,
+                    "lykke.mt",
+                    "trades",
+                    "-v2");
+                
                 _services.AddSingleton<IRabbitPoisonHandingService<MtTradeMessage>>(provider => new RabbitPoisonHandingService<MtTradeMessage>(
                     provider.GetService<ILog>(),
-                    provider.GetService<ITradesSubscriber>().SubscriptionSettings));
+                    subscriptionSettings));
 
                 _services.AddSingleton<ITradesPoisonHandingService>(provider => new TradesPoisonHandingService<MtTradeMessage>(
                     provider.GetService<IRabbitPoisonHandingService<MtTradeMessage>>()));
@@ -249,8 +278,7 @@ namespace Lykke.Job.CandlesProducer.Modules
                 if (_settings.CandlesGenerator.GenerateTrades)
                 {
                     _services.AddRabbitMqListener<MtTradeMessage, MtTradesHandler>(
-                        RabbitMqSubscriptionSettingsHelper.GetSubscriptionSettings(
-                            _settings.Rabbit.TradesSubscription.ConnectionString, "lykke.mt", "trades", "-v2"),
+                        subscriptionSettings,
                         opt =>
                         {
                             opt.SerializationFormat = SerializationFormat.Json;
