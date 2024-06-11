@@ -14,7 +14,6 @@ using Lykke.Job.CandlesProducer.Core.Domain.Candles;
 using Lykke.Job.CandlesProducer.Core.Services;
 using Lykke.Job.CandlesProducer.Core.Services.Assets;
 using Lykke.Job.CandlesProducer.Core.Services.Candles;
-using Lykke.Job.CandlesProducer.Core.Services.Quotes;
 using Lykke.Job.CandlesProducer.Services;
 using Lykke.Job.CandlesProducer.Services.Assets;
 using Lykke.Job.CandlesProducer.Services.Candles;
@@ -161,33 +160,55 @@ namespace Lykke.Job.CandlesProducer.Modules
             {
                 if (_quotesSourceType == QuotesSourceType.Spot)
                 {
+                    var subscriptionSettings = RabbitMqSubscriptionSettingsHelper.GetSubscriptionSettings(
+                        _settings.Rabbit.QuotesSubscribtion,
+                        "lykke",
+                        "quotefeed");
+                    
                     _services.AddSingleton<IRabbitPoisonHandingService<QuoteMessage>>(provider => new RabbitPoisonHandingService<QuoteMessage>(
                         provider.GetService<ILog>(),
-                        provider.GetService<IQuotesSubscriber>().SubscriptionSettings));
+                        subscriptionSettings));
 
                     _services.AddSingleton<IQuotesPoisonHandingService>(provider => new QuotesPoisonHandingService<QuoteMessage>(
                         provider.GetService<IRabbitPoisonHandingService<QuoteMessage>>()));
 
-                    builder.RegisterType<SpotQuotesSubscriber>()
-                        .As<IQuotesSubscriber>()
-                        .SingleInstance()
-                        .WithParameter(TypedParameter.From(_settings.Rabbit.QuotesSubscribtion))
-                        .WithParameter(TypedParameter.From(_settings.SkipEodQuote));
+                    _services.AddRabbitMqListener<QuoteMessage, SpotQuotesHandler>(
+                        subscriptionSettings,
+                        opt =>
+                        {
+                            opt.SerializationFormat = SerializationFormat.Json;
+                            opt.ShareConnection = true;
+                            opt.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
+                        },
+                        (s, p) =>
+                        {
+                            var loggerFactory = p.GetService<ILoggerFactory>();
+                            s.UseMiddleware(
+                                    new DeadQueueMiddleware<QuoteMessage>(
+                                        loggerFactory.CreateLogger<DeadQueueMiddleware<QuoteMessage>>()))
+                                .UseMiddleware(
+                                    new ResilientErrorHandlingMiddleware<QuoteMessage>(
+                                        loggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<QuoteMessage>>(),
+                                        TimeSpan.FromSeconds(10),
+                                        10));
+                        });
                 }
                 else
                 {
+                    var subscriptionSettings = RabbitMqSubscriptionSettingsHelper.GetSubscriptionSettings(
+                        _settings.Rabbit.QuotesSubscribtion,
+                        "lykke.mt",
+                        "pricefeed");
+                    
                     _services.AddSingleton<IRabbitPoisonHandingService<MtQuoteMessage>>(provider => new RabbitPoisonHandingService<MtQuoteMessage>(
                         provider.GetService<ILog>(),
-                        provider.GetService<IQuotesSubscriber>().SubscriptionSettings));
+                        subscriptionSettings));
 
                     _services.AddSingleton<IQuotesPoisonHandingService>(provider => new QuotesPoisonHandingService<MtQuoteMessage>(
                         provider.GetService<IRabbitPoisonHandingService<MtQuoteMessage>>()));
 
                     _services.AddRabbitMqListener<MtQuoteMessage, MtQuotesHandler>(
-                        RabbitMqSubscriptionSettingsHelper.GetSubscriptionSettings(
-                            _settings.Rabbit.QuotesSubscribtion,
-                            "lykke.mt",
-                            "pricefeed"),
+                        subscriptionSettings,
                         opt =>
                         {
                             opt.SerializationFormat = SerializationFormat.Json;
@@ -207,19 +228,6 @@ namespace Lykke.Job.CandlesProducer.Modules
                                         10));
                         });
                 }
-            }
-            else
-            {
-                _services.AddSingleton<IRabbitPoisonHandingService<EmptyQuote>>(provider => new RabbitPoisonHandingService<EmptyQuote>(
-                       provider.GetService<ILog>(),
-                       provider.GetService<IQuotesSubscriber>().SubscriptionSettings));
-
-                _services.AddSingleton<IQuotesPoisonHandingService>(provider => new QuotesPoisonHandingService<EmptyQuote>(
-                    provider.GetService<IRabbitPoisonHandingService<EmptyQuote>>()));
-
-                builder.RegisterType<EmptyQuotesSubscriber>()
-                    .As<IQuotesSubscriber>()
-                    .SingleInstance();
             }
 
             if (_quotesSourceType == QuotesSourceType.Spot)

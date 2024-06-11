@@ -6,77 +6,51 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common;
-using Common.Log;
-using Lykke.Job.CandlesProducer.Core.Services;
+
+using JetBrains.Annotations;
+
 using Lykke.Job.CandlesProducer.Core.Services.Candles;
-using Lykke.Job.CandlesProducer.Core.Services.Quotes;
-using Lykke.Job.CandlesProducer.Services.Helpers;
 using Lykke.Job.QuotesProducer.Contract;
-using Lykke.RabbitMqBroker;
 using Lykke.RabbitMqBroker.Subscriber;
+
+using Microsoft.Extensions.Logging;
 
 namespace Lykke.Job.CandlesProducer.Services.Quotes.Spot
 {
-    public class SpotQuotesSubscriber : IQuotesSubscriber
+    [UsedImplicitly]
+    public class SpotQuotesHandler : IMessageHandler<QuoteMessage>
     {
-        private readonly ILog _log;
         private readonly ICandlesManager _candlesManager;
-        private readonly string _connectionString;
+        private readonly ILogger<SpotQuotesHandler> _logger;
 
-        private IStartStop _subscriber;
-
-        public SpotQuotesSubscriber(ILog log, ICandlesManager candlesManager, string connectionString)
+        public SpotQuotesHandler(ICandlesManager candlesManager, ILogger<SpotQuotesHandler> logger)
         {
-            _log = log;
             _candlesManager = candlesManager;
-            _connectionString = connectionString;
+            _logger = logger;
         }
 
-        private RabbitMqSubscriptionSettings _subscriptionSettings;
-        public RabbitMqSubscriptionSettings SubscriptionSettings
-        {
-            get
-            {
-                if (_subscriptionSettings == null)
-                {
-                    _subscriptionSettings = RabbitMqSubscriptionSettingsHelper.GetSubscriptionSettings(_connectionString, "lykke", "quotefeed");
-                }
-                return _subscriptionSettings;
-            }
-        }
-
-        public void Start()
-        {
-            //_subscriber = _subscribersFactory.Create<QuoteMessage>(SubscriptionSettings, ProcessQuoteAsync);
-        }
-
-        public void Stop()
-        {
-            _subscriber?.Stop();
-        }
-
-        private async Task ProcessQuoteAsync(QuoteMessage quote)
+        public async Task Handle(QuoteMessage message)
         {
             try
             {
-                var validationErrors = ValidateQuote(quote);
+                var validationErrors = ValidateQuote(message);
                 if (validationErrors.Any())
                 {
-                    var message = string.Join("\r\n", validationErrors);
-                    await _log.WriteWarningAsync(nameof(SpotQuotesSubscriber), nameof(ProcessQuoteAsync), quote.ToJson(), message);
+                    var errorsText = string.Join("\r\n", validationErrors);
+                    _logger.LogWarning("Errors: {Errors}, quote: {Quote}", errorsText, message.ToJson());
 
                     return;
                 }
 
-                await _candlesManager.ProcessSpotQuoteAsync(quote);
+                await _candlesManager.ProcessSpotQuoteAsync(message);
             }
             catch (Exception)
             {
-                await _log.WriteWarningAsync(nameof(SpotQuotesSubscriber), nameof(ProcessQuoteAsync), quote.ToJson(), "Failed to process quote");
+                _logger.LogWarning("Failed to process quote : {Quote}", message.ToJson());
                 throw;
             }
         }
-
+        
         private static IReadOnlyCollection<string> ValidateQuote(QuoteMessage quote)
         {
             var errors = new List<string>();
@@ -102,11 +76,6 @@ namespace Lykke.Job.CandlesProducer.Services.Quotes.Spot
             }
 
             return errors;
-        }
-
-        public void Dispose()
-        {
-            _subscriber?.Dispose();
         }
     }
 }

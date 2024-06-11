@@ -7,12 +7,9 @@ using System.Threading.Tasks;
 using Common.Log;
 using Lykke.Job.CandlesProducer.Core.Services;
 using Lykke.Job.CandlesProducer.Core.Services.Candles;
-using Lykke.Job.CandlesProducer.Core.Services.Quotes;
 
 namespace Lykke.Job.CandlesProducer.Services
 {
-    // TODO: Start MT trades subscriber
-
     public class StartupManager : IStartupManager
     {
         private readonly IEnumerable<ICandlesPublisher> _candlesPublishers;
@@ -21,7 +18,6 @@ namespace Lykke.Job.CandlesProducer.Services
         private readonly ILog _log;
 
         public StartupManager(
-            IQuotesSubscriber quotesSubscriber,
             IEnumerable<ISnapshotSerializer> snapshotSerializers,
             IEnumerable<ICandlesPublisher> candlesPublishers,
             IDefaultCandlesPublisher defaultCandlesPublisher,
