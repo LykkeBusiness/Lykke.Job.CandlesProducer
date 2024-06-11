@@ -174,24 +174,8 @@ namespace Lykke.Job.CandlesProducer.Modules
 
                     _services.AddRabbitMqListener<QuoteMessage, SpotQuotesHandler>(
                         subscriptionSettings,
-                        opt =>
-                        {
-                            opt.SerializationFormat = SerializationFormat.Json;
-                            opt.ShareConnection = true;
-                            opt.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
-                        },
-                        (s, p) =>
-                        {
-                            var loggerFactory = p.GetService<ILoggerFactory>();
-                            s.UseMiddleware(
-                                    new DeadQueueMiddleware<QuoteMessage>(
-                                        loggerFactory.CreateLogger<DeadQueueMiddleware<QuoteMessage>>()))
-                                .UseMiddleware(
-                                    new ResilientErrorHandlingMiddleware<QuoteMessage>(
-                                        loggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<QuoteMessage>>(),
-                                        TimeSpan.FromSeconds(10),
-                                        10));
-                        });
+                        ConfigureJsonNoLossListener,
+                        ConfigureMiddlewares);
                 }
                 else
                 {
@@ -208,25 +192,9 @@ namespace Lykke.Job.CandlesProducer.Modules
                         provider.GetService<IRabbitPoisonHandingService>()));
 
                     _services.AddRabbitMqListener<MtQuoteMessage, MtQuotesHandler>(
-                        subscriptionSettings,
-                        opt =>
-                        {
-                            opt.SerializationFormat = SerializationFormat.Json;
-                            opt.ShareConnection = true;
-                            opt.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
-                        },
-                        (s, p) =>
-                        {
-                            var loggerFactory = p.GetService<ILoggerFactory>();
-                            s.UseMiddleware(
-                                    new DeadQueueMiddleware<MtQuoteMessage>(
-                                        loggerFactory.CreateLogger<DeadQueueMiddleware<MtQuoteMessage>>()))
-                                .UseMiddleware(
-                                    new ResilientErrorHandlingMiddleware<MtQuoteMessage>(
-                                        loggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<MtQuoteMessage>>(),
-                                        TimeSpan.FromSeconds(10),
-                                        10));
-                        });
+                        subscriptionSettings, 
+                        ConfigureJsonNoLossListener,
+                        ConfigureMiddlewares);
                 }
             }
 
@@ -249,24 +217,8 @@ namespace Lykke.Job.CandlesProducer.Modules
 
                 _services.AddRabbitMqListener<LimitOrdersMessage, SpotTradesHandler>(
                     subscriptionSettings,
-                    opt =>
-                    {
-                        opt.SerializationFormat = SerializationFormat.Json;
-                        opt.ShareConnection = true;
-                        opt.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
-                    },
-                    (s, p) =>
-                    {
-                        var loggerFactory = p.GetService<ILoggerFactory>();
-                        s.UseMiddleware(
-                                new DeadQueueMiddleware<LimitOrdersMessage>(
-                                    loggerFactory.CreateLogger<DeadQueueMiddleware<LimitOrdersMessage>>()))
-                            .UseMiddleware(
-                                new ResilientErrorHandlingMiddleware<LimitOrdersMessage>(
-                                    loggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<LimitOrdersMessage>>(),
-                                    TimeSpan.FromSeconds(10),
-                                    10));
-                    });
+                    ConfigureJsonNoLossListener,
+                    ConfigureMiddlewares);
             }
             else
             {
@@ -287,20 +239,8 @@ namespace Lykke.Job.CandlesProducer.Modules
                 {
                     _services.AddRabbitMqListener<MtTradeMessage, MtTradesHandler>(
                         subscriptionSettings,
-                        opt =>
-                        {
-                            opt.SerializationFormat = SerializationFormat.Json;
-                            opt.ShareConnection = true;
-                            opt.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
-                        }, (s, p) =>
-                        {
-                            var loggerFactory = p.GetService<ILoggerFactory>();
-                            s.UseMiddleware(new DeadQueueMiddleware<MtTradeMessage>(
-                                    loggerFactory.CreateLogger<DeadQueueMiddleware<MtTradeMessage>>()))
-                                .UseMiddleware(new ResilientErrorHandlingMiddleware<MtTradeMessage>(
-                                    loggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<MtTradeMessage>>(),
-                                    TimeSpan.FromSeconds(10), 10));
-                        });
+                        ConfigureJsonNoLossListener, 
+                        ConfigureMiddlewares);
                 }
             }
 
@@ -357,6 +297,27 @@ namespace Lykke.Job.CandlesProducer.Modules
                     .As<ISnapshotSerializer>()
                     .PreserveExistingDefaults();
             }
+        }
+        
+        private static void ConfigureJsonNoLossListener<T>(RabbitMqListenerOptions<T> options) where T : class
+        {
+            options.SerializationFormat = SerializationFormat.Json;
+            options.ShareConnection = true;
+            options.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
+        }
+
+        private static void ConfigureMiddlewares<T>(RabbitMqSubscriber<T> subscriber, IServiceProvider provider)
+        {
+            var loggerFactory = provider.GetService<ILoggerFactory>();
+            subscriber
+                .UseMiddleware(
+                    new DeadQueueMiddleware<T>(
+                        logger: loggerFactory.CreateLogger<DeadQueueMiddleware<T>>()))
+                .UseMiddleware(
+                    new ResilientErrorHandlingMiddleware<T>(
+                        logger: loggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<T>>(),
+                        retryTimeout: TimeSpan.FromSeconds(10),
+                        retryNum: 10));
         }
     }
 }
