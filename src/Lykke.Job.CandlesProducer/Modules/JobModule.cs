@@ -343,7 +343,7 @@ namespace Lykke.Job.CandlesProducer.Modules
                 var snapshotsConnStringManager = _dbSettings.ConnectionString(x => x.SnapshotsConnectionString);
 
                 builder.RegisterType<MidPriceQuoteGeneratorSnapshotRepository>()
-                    .As<ISnapshotRepository<IImmutableDictionary<string, IMarketState>>>()
+                    .As<ISnapshotRepository<ImmutableDictionary<string, IMarketState>>>()
                     .WithParameter(TypedParameter.From(AzureBlobStorage.Create(snapshotsConnStringManager, maxExecutionTimeout: TimeSpan.FromMinutes(5))));
 
                 builder.RegisterType<SnapshotSerializer<IImmutableDictionary<string, IMarketState>>>()

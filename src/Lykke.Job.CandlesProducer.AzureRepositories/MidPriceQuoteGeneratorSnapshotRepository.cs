@@ -13,7 +13,7 @@ using MessagePack;
 
 namespace Lykke.Job.CandlesProducer.AzureRepositories
 {
-    public class MidPriceQuoteGeneratorSnapshotRepository : ISnapshotRepository<IImmutableDictionary<string, IMarketState>>
+    public class MidPriceQuoteGeneratorSnapshotRepository : ISnapshotRepository<ImmutableDictionary<string, IMarketState>>
     {
         private const string Key = "MidPriceQuoteGenerator";
 
@@ -24,7 +24,7 @@ namespace Lykke.Job.CandlesProducer.AzureRepositories
             _storage = storage;
         }
 
-        public async Task SaveAsync(IImmutableDictionary<string, IMarketState> state)
+        public async Task SaveAsync(ImmutableDictionary<string, IMarketState> state)
         {
             using (var stream = new MemoryStream())
             {
@@ -39,7 +39,7 @@ namespace Lykke.Job.CandlesProducer.AzureRepositories
             }
         }
 
-        public async Task<IImmutableDictionary<string, IMarketState>> TryGetAsync()
+        public async Task<ImmutableDictionary<string, IMarketState>> TryGetAsync()
         {
             if (!await _storage.HasBlobAsync(Constants.SnapshotsContainer, Key))
             {
