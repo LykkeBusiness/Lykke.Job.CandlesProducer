@@ -56,9 +56,9 @@ namespace Lykke.Job.CandlesProducer.Services.Quotes.Mt
                     Timestamp = message.Date
                 });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _logger.LogWarning("Failed to process quote: {Quote}", message.ToJson());
+                _logger.LogWarning(ex, "Failed to process quote: {Quote}", message.ToJson());
                 throw;
             }
         }
