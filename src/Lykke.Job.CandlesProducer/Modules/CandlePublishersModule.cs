@@ -33,6 +33,7 @@ namespace Lykke.Job.CandlesProducer.Modules
 
             builder.RegisterType<DefaultCandlesPublisher>()
                 .As<IDefaultCandlesPublisher>()
+                .As<IStartable>()
                 .SingleInstance()
                 .WithParameter("connectionString", _candlesPublicationRabbitSettings.ConnectionString)
                 .WithParameter("nspace", _candlesPublicationRabbitSettings.Namespace)
@@ -46,6 +47,7 @@ namespace Lykke.Job.CandlesProducer.Modules
 
                 builder.RegisterType<CandlesPublisher>()
                     .As<ICandlesPublisher>()
+                    .As<IStartable>()
                     .SingleInstance()
                     .WithParameter("connectionString", _candlesPublicationRabbitSettings.ConnectionString)
                     .WithParameter("nspace", _candlesPublicationRabbitSettings.Namespace)
