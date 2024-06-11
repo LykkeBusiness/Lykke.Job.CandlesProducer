@@ -44,12 +44,12 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
             _assetMarketStates = new Dictionary<string, MarketState>();
         }
 
-        public IImmutableDictionary<string, IMarketState> GetState()
+        public ImmutableDictionary<string, IMarketState> GetState()
         {
             return _assetMarketStates.ToImmutableDictionary(i => i.Key, i => (IMarketState)i.Value);
         }
 
-        public void SetState(IImmutableDictionary<string, IMarketState> state)
+        public void SetState(ImmutableDictionary<string, IMarketState> state)
         {
             if (_assetMarketStates.Count > 0)
             {
@@ -59,7 +59,7 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
             _assetMarketStates = state.ToDictionary(i => i.Key, i => new MarketState(i.Value.Ask, i.Value.Bid));
         }
 
-        public string DescribeState(IImmutableDictionary<string, IMarketState> state)
+        public string DescribeState(ImmutableDictionary<string, IMarketState> state)
         {
             return $"Assets count: {state.Count}";
         }

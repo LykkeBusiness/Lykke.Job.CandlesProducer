@@ -306,7 +306,7 @@ namespace Lykke.Job.CandlesProducer.Modules
 
             builder.RegisterType<MidPriceQuoteGenerator>()
                 .As<IMidPriceQuoteGenerator>()
-                .As<IHaveState<IImmutableDictionary<string, IMarketState>>>()
+                .As<IHaveState<ImmutableDictionary<string, IMarketState>>>()
                 .SingleInstance();
 
             builder.RegisterType<CandlesGenerator>()
