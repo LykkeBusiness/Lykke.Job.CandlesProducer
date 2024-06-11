@@ -327,7 +327,7 @@ namespace Lykke.Job.CandlesProducer.Modules
                     .SingleInstance();
 
 
-                builder.RegisterType<SnapshotSerializer<IImmutableDictionary<string, IMarketState>>>()
+                builder.RegisterType<SnapshotSerializer<ImmutableDictionary<string, IMarketState>>>()
                     .As<ISnapshotSerializer>();
 
                 builder.Register<ISnapshotRepository<ImmutableDictionary<string, ICandle>>>(ctx =>
@@ -346,7 +346,7 @@ namespace Lykke.Job.CandlesProducer.Modules
                     .As<ISnapshotRepository<ImmutableDictionary<string, IMarketState>>>()
                     .WithParameter(TypedParameter.From(AzureBlobStorage.Create(snapshotsConnStringManager, maxExecutionTimeout: TimeSpan.FromMinutes(5))));
 
-                builder.RegisterType<SnapshotSerializer<IImmutableDictionary<string, IMarketState>>>()
+                builder.RegisterType<SnapshotSerializer<ImmutableDictionary<string, IMarketState>>>()
                     .As<ISnapshotSerializer>();
 
                 builder.RegisterType<CandlesGeneratorSnapshotRepository>()
