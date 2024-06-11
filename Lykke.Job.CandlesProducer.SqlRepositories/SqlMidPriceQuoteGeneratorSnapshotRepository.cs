@@ -10,7 +10,7 @@ using Lykke.Job.CandlesProducer.AzureRepositories;
 
 namespace Lykke.Job.CandlesProducer.SqlRepositories
 {
-    public class SqlMidPriceQuoteGeneratorSnapshotRepository : ISnapshotRepository<ImmutableDictionary<string, IMarketState>>
+    public class SqlMidPriceQuoteGeneratorSnapshotRepository : ISnapshotRepository<IImmutableDictionary<string, IMarketState>>
     {
         private const string BlobContainer = "MidPriceQuoteGeneratorSnapshot";
         private const string Key = "MidPriceQuoteGenerator";
@@ -22,19 +22,19 @@ namespace Lykke.Job.CandlesProducer.SqlRepositories
             _blobRepository = new SqlBlobRepository(connectionString);
         }
     
-        public Task<ImmutableDictionary<string, IMarketState>> TryGetAsync()
+        public async Task<IImmutableDictionary<string, IMarketState>> TryGetAsync()
         {
             var model = _blobRepository.Read<Dictionary<string, MarketStateEntity>>(BlobContainer, Key);
             if (model != null)
             {
-                return Task.FromResult(model.ToImmutableDictionary(i => i.Key, i => (IMarketState)i.Value));
+                model.ToImmutableDictionary(i => i.Key, i => (IMarketState)i.Value);
                 
 
             }
-            return Task.FromResult(new Dictionary<string, IMarketState>().ToImmutableDictionary());
+            return new Dictionary<string, IMarketState>().ToImmutableDictionary();
         }
 
-        public async Task SaveAsync(ImmutableDictionary<string, IMarketState> state)
+        public async Task SaveAsync(IImmutableDictionary<string, IMarketState> state)
         {
            await _blobRepository.Write(BlobContainer, Key, state);
         }

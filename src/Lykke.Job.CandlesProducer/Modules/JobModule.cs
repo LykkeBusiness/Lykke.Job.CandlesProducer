@@ -306,7 +306,7 @@ namespace Lykke.Job.CandlesProducer.Modules
 
             builder.RegisterType<MidPriceQuoteGenerator>()
                 .As<IMidPriceQuoteGenerator>()
-                .As<IHaveState<ImmutableDictionary<string, IMarketState>>>()
+                .As<IHaveState<IImmutableDictionary<string, IMarketState>>>()
                 .SingleInstance();
 
             builder.RegisterType<CandlesGenerator>()
@@ -322,12 +322,11 @@ namespace Lykke.Job.CandlesProducer.Modules
 
             if (_settings.Db.StorageMode == StorageMode.SqlServer)
             {
-                builder.Register<ISnapshotRepository<ImmutableDictionary<string, IMarketState>>>(ctx =>
+                builder.Register<ISnapshotRepository<IImmutableDictionary<string, IMarketState>>>(ctx =>
                         new SqlMidPriceQuoteGeneratorSnapshotRepository(_settings.Db.SnapshotsConnectionString))
                     .SingleInstance();
-
-
-                builder.RegisterType<SnapshotSerializer<ImmutableDictionary<string, IMarketState>>>()
+                
+                builder.RegisterType<SnapshotSerializer<IImmutableDictionary<string, IMarketState>>>()
                     .As<ISnapshotSerializer>();
 
                 builder.Register<ISnapshotRepository<ImmutableDictionary<string, ICandle>>>(ctx =>
@@ -343,10 +342,10 @@ namespace Lykke.Job.CandlesProducer.Modules
                 var snapshotsConnStringManager = _dbSettings.ConnectionString(x => x.SnapshotsConnectionString);
 
                 builder.RegisterType<MidPriceQuoteGeneratorSnapshotRepository>()
-                    .As<ISnapshotRepository<ImmutableDictionary<string, IMarketState>>>()
+                    .As<ISnapshotRepository<IImmutableDictionary<string, IMarketState>>>()
                     .WithParameter(TypedParameter.From(AzureBlobStorage.Create(snapshotsConnStringManager, maxExecutionTimeout: TimeSpan.FromMinutes(5))));
 
-                builder.RegisterType<SnapshotSerializer<ImmutableDictionary<string, IMarketState>>>()
+                builder.RegisterType<SnapshotSerializer<IImmutableDictionary<string, IMarketState>>>()
                     .As<ISnapshotSerializer>();
 
                 builder.RegisterType<CandlesGeneratorSnapshotRepository>()
