@@ -2,7 +2,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Lykke.Job.CandlesProducer.Core.Domain;
-using Lykke.SettingsReader.Attributes;
 
 namespace Lykke.Job.CandlesProducer.Settings
 {

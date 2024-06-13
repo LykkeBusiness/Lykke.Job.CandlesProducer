@@ -62,9 +62,12 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
 
         private Task PublishV2Async(IEnumerable<CandleUpdateResult> updates)
         {
+            if (_publisher == null)
+                throw new InvalidOperationException($"Publisher with shard name {ShardName} is not initialized yet");
+            
             var @event = new CandlesUpdatedEvent
             {
-                ContractVersion = Contract.Constants.ContractVersion,
+                ContractVersion = Constants.ContractVersion,
                 UpdateTimestamp = DateTime.UtcNow,
                 Candles = updates
                     .Select(c => new CandleUpdate

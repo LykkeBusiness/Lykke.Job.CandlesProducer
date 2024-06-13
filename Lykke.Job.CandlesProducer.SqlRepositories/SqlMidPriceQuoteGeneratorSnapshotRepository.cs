@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Lykke.Job.CandlesProducer.Core.Domain;
 using Lykke.Job.CandlesProducer.Core.Domain.Candles;
 using Lykke.Job.CandlesProducer.AzureRepositories;
-using MarginTrading.SqlRepositories;
 
 namespace Lykke.Job.CandlesProducer.SqlRepositories
 {
@@ -28,8 +27,9 @@ namespace Lykke.Job.CandlesProducer.SqlRepositories
             var model = _blobRepository.Read<Dictionary<string, MarketStateEntity>>(BlobContainer, Key);
             if (model != null)
             {
-                return model.ToImmutableDictionary(i => i.Key, i => (IMarketState)i.Value);
+                model.ToImmutableDictionary(i => i.Key, i => (IMarketState)i.Value);
                 
+
             }
             return new Dictionary<string, IMarketState>().ToImmutableDictionary();
         }

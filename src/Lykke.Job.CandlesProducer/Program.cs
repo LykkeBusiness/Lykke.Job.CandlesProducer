@@ -18,7 +18,7 @@ namespace Lykke.Job.CandlesProducer
 
         public static string EnvInfo => Environment.GetEnvironmentVariable("ENV_INFO");
 
-        static async Task Main(string[] args)
+        static async Task Main()
         {
             Console.WriteLine($"CandlesProducer version {Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion}");
 #if DEBUG

@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Common;
 using Common.Log;
 using Lykke.Job.CandlesProducer.Core.Services.Assets;
-using Lykke.Job.CandlesProducer.Core.Settings;
 using Lykke.Service.Assets.Client.Custom;
 using MarginTrading.SettingsService.Contracts;
 

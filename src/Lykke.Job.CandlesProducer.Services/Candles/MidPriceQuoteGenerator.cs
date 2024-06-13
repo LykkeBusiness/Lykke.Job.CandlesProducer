@@ -51,6 +51,9 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
 
         public void SetState(IImmutableDictionary<string, IMarketState> state)
         {
+            if (state == null || state.Count == 0)
+                return;
+            
             if (_assetMarketStates.Count > 0)
             {
                 throw new InvalidOperationException("State already not empty");

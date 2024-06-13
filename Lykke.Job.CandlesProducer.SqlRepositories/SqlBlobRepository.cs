@@ -2,15 +2,19 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Dapper;
+
 using Lykke.Job.CandlesProducer.Core.Domain;
 using Lykke.Logs.MsSql.Extensions;
+
+using Microsoft.Data.SqlClient;
+
 using Newtonsoft.Json;
 
-namespace MarginTrading.SqlRepositories
+namespace Lykke.Job.CandlesProducer.SqlRepositories
 {
     public class SqlBlobRepository : ICandlesProducerBlobRepository
     {
@@ -49,10 +53,6 @@ namespace MarginTrading.SqlRepositories
                 if (string.IsNullOrEmpty(data) || data == "{}" )
                     return default(T);
 
-                var settings = new JsonSerializerSettings()
-                {
-                    TypeNameHandling = TypeNameHandling.All
-                };
                 return JsonConvert.DeserializeObject<T>(data);
             }
         }

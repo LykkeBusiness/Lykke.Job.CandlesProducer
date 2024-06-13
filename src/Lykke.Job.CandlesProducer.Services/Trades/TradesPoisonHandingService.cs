@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Lykke.Job.CandlesProducer.Core.Services;
 
 namespace Lykke.Job.CandlesProducer.Services.Trades
 {
-    public class TradesPoisonHandingService<T> : ITradesPoisonHandingService where T : class
+    public class TradesPoisonHandingService : ITradesPoisonHandingService
     {
-        private IRabbitPoisonHandingService<T> _rabbitPoisonHandingService;
+        private readonly IRabbitPoisonHandingService _rabbitPoisonHandingService;
 
-        public TradesPoisonHandingService(IRabbitPoisonHandingService<T> rabbitPoisonHandingService)
+        public TradesPoisonHandingService(IRabbitPoisonHandingService rabbitPoisonHandingService)
         {
             _rabbitPoisonHandingService = rabbitPoisonHandingService;
         }

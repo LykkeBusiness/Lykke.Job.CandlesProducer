@@ -81,7 +81,7 @@ namespace Lykke.Job.CandlesProducer.AzureRepositories
                 return model
                     .Select(x => new
                     {
-                        Key = x.Key,
+                        x.Key,
                         Candle = (ICandle) x.Value.OrderBy(c => c.Timestamp).LastOrDefault()
                     })
                     .Where(x => x.Candle != null)
