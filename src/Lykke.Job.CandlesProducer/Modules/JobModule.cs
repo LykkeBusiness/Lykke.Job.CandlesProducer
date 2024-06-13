@@ -175,7 +175,8 @@ namespace Lykke.Job.CandlesProducer.Modules
                     _services.AddRabbitMqListener<QuoteMessage, SpotQuotesHandler>(
                         subscriptionSettings,
                         ConfigureJsonNoLossListener,
-                        ConfigureMiddlewares);
+                        ConfigureMiddlewares,
+                        false);
                 }
                 else
                 {
@@ -194,7 +195,8 @@ namespace Lykke.Job.CandlesProducer.Modules
                     _services.AddRabbitMqListener<MtQuoteMessage, MtQuotesHandler>(
                         subscriptionSettings, 
                         ConfigureJsonNoLossListener,
-                        ConfigureMiddlewares);
+                        ConfigureMiddlewares,
+                        false);
                 }
             }
 
@@ -218,7 +220,8 @@ namespace Lykke.Job.CandlesProducer.Modules
                 _services.AddRabbitMqListener<LimitOrdersMessage, SpotTradesHandler>(
                     subscriptionSettings,
                     ConfigureJsonNoLossListener,
-                    ConfigureMiddlewares);
+                    ConfigureMiddlewares,
+                    false);
             }
             else
             {
@@ -240,7 +243,8 @@ namespace Lykke.Job.CandlesProducer.Modules
                     _services.AddRabbitMqListener<MtTradeMessage, MtTradesHandler>(
                         subscriptionSettings,
                         ConfigureJsonNoLossListener, 
-                        ConfigureMiddlewares);
+                        ConfigureMiddlewares,
+                        false);
                 }
             }
 
