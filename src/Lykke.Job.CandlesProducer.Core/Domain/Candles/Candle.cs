@@ -22,15 +22,15 @@ namespace Lykke.Job.CandlesProducer.Core.Domain.Candles
         public DateTime OpenTimestamp { get; }
 
         private Candle(
-            string assetPairId, 
-            CandlePriceType priceType, 
-            CandleTimeInterval timeInterval, 
-            DateTime timestamp, 
+            string assetPairId,
+            CandlePriceType priceType,
+            CandleTimeInterval timeInterval,
+            DateTime timestamp,
             DateTime latestChangeTimestamp,
             DateTime openTimestamp,
-            double open, 
-            double close, 
-            double low, 
+            double open,
+            double close,
+            double low,
             double high,
             double tradingVolume,
             double tradingOppositeVolume)
@@ -72,14 +72,15 @@ namespace Lykke.Job.CandlesProducer.Core.Domain.Candles
             string assetPair,
             DateTime timestamp,
             double price,
-            CandlePriceType priceType, 
+            CandlePriceType priceType,
             CandleTimeInterval timeInterval)
         {
             if (priceType != CandlePriceType.Ask &&
                 priceType != CandlePriceType.Bid &&
                 priceType != CandlePriceType.Mid)
             {
-                throw new ArgumentOutOfRangeException(nameof(priceType), priceType, "Price type should be Ask, Bid or Mid for the quoting candle");
+                throw new ArgumentOutOfRangeException(nameof(priceType), priceType,
+                    "Price type should be Ask, Bid or Mid for the quoting candle");
             }
 
             var intervalTimestamp = timestamp.TruncateTo(timeInterval);
@@ -105,7 +106,7 @@ namespace Lykke.Job.CandlesProducer.Core.Domain.Candles
             string assetPair,
             DateTime timestamp,
             double price,
-            double baseTradingVolume, 
+            double baseTradingVolume,
             double quotingTradingVolume,
             CandleTimeInterval timeInterval)
         {
@@ -155,6 +156,47 @@ namespace Lykke.Job.CandlesProducer.Core.Domain.Candles
                 TradingOppositeVolume);
         }
 
+        public Candle UpdateMonthlyOrWeeklyRFactor(DateTime timestamp, double rFactor)
+        {
+            if (rFactor <= 0)
+            {
+                throw new ArgumentException("R-factor should be greater than 0.");
+            }
+
+            if (timestamp < LatestChangeTimestamp)
+            {
+                throw new ArgumentException("Timestamp shouldn't be less than LatestChangeTimestamp.");
+            }
+
+            if (TimeInterval != CandleTimeInterval.Month || TimeInterval != CandleTimeInterval.Week) return this;
+            
+            var low = Low;
+            var high = High;
+            
+            if (rFactor > 1)
+            {
+                low = Low * rFactor;
+            }
+            else
+            {
+                high = High * rFactor;
+            }
+            
+            return new Candle(
+                AssetPairId,
+                PriceType,
+                TimeInterval,
+                Timestamp,
+                timestamp,
+                OpenTimestamp,
+                Open * rFactor,
+                Close * rFactor,
+                low,
+                high,
+                TradingVolume,
+                TradingOppositeVolume);
+        }
+
         public Candle UpdateQuotingCandle(DateTime timestamp, double price)
         {
             if (PriceType != CandlePriceType.Ask &&
@@ -192,7 +234,8 @@ namespace Lykke.Job.CandlesProducer.Core.Domain.Candles
                 0);
         }
 
-        public Candle UpdateTradingCandle(DateTime timestamp, double price, double tradingVolume, double tradingOppositeVolume)
+        public Candle UpdateTradingCandle(DateTime timestamp, double price, double tradingVolume,
+            double tradingOppositeVolume)
         {
             if (PriceType != CandlePriceType.Trades)
             {
@@ -233,6 +276,7 @@ namespace Lykke.Job.CandlesProducer.Core.Domain.Candles
             {
                 return false;
             }
+
             if (ReferenceEquals(this, other))
             {
                 return true;
@@ -257,14 +301,17 @@ namespace Lykke.Job.CandlesProducer.Core.Domain.Candles
             {
                 return false;
             }
+
             if (ReferenceEquals(this, obj))
             {
                 return true;
             }
+
             if (obj.GetType() != GetType())
             {
                 return false;
             }
+
             return Equals((Candle)obj);
         }
 

@@ -44,6 +44,19 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
                 });
         }
 
+        public CandleUpdateResult UpdateMonthlyOrWeeklyRFactor(ICandle candle, DateTime timestamp, double rFactor)
+        {
+            return Update(candle.AssetPairId, timestamp, candle.PriceType, candle.TimeInterval,
+                createNewCandle: () => Candle.Copy(candle).UpdateMonthlyOrWeeklyRFactor(timestamp, rFactor),
+                updateCandle: oldCandle => oldCandle.UpdateMonthlyOrWeeklyRFactor(timestamp, rFactor),
+                getLoggingContext: candle => new
+                {
+                    candle = candle,
+                    timestamp = timestamp,
+                    rFactor = rFactor
+                });
+        }
+
         public CandleUpdateResult UpdateQuotingCandle(string assetPair, DateTime timestamp, double price, CandlePriceType priceType, CandleTimeInterval timeInterval)
         {
             // We can update LastTradePrice for only Trades candle below:
