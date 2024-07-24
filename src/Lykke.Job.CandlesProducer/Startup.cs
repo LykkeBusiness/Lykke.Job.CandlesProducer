@@ -131,9 +131,7 @@ namespace Lykke.Job.CandlesProducer
                 jobSettings.CurrentValue.Rabbit.CandlesPublication, 
                 _candlesProducerSettings));
 
-            var cqrsSettings = Configuration.GetSection("CqrsSettings").Get<CqrsSettings>();
-            
-            builder.RegisterModule(new CqrsModule(cqrsSettings));
+            builder.RegisterModule(new CqrsModule(jobSettings.CurrentValue.Cqrs));
 
             if (quotesSourceType == QuotesSourceType.Mt)
             {

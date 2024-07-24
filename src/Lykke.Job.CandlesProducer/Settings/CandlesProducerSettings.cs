@@ -26,5 +26,7 @@ namespace Lykke.Job.CandlesProducer.Settings
 
         [Optional]
         public bool SkipEodQuote { get; set; } = true;
+        
+        public CqrsSettings Cqrs { get; set; }
     }
 }
