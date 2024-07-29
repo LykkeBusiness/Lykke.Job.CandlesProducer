@@ -43,14 +43,14 @@ namespace Lykke.Job.CandlesProducer.Workflow
                 return;
             }
 
-            if (command.RFactorDate == command.LastTradingDate)
+            if (command.RFactorDate == command.LastTradingDay)
             {
                 await _candlesManager.UpdateRFactor(command.ProductId, decimal.ToDouble(command.RFactor));
             }
             else
             {
                 await _candlesManager.UpdateMonthlyOrWeeklyRFactor(command.ProductId, decimal.ToDouble(command.RFactor),
-                    command.RFactorDate, command.LastTradingDate);
+                    command.RFactorDate, command.LastTradingDay);
             }
 
             publisher.PublishEvent(new CurrentCandlesUpdatedEvent() { TaskId = command.TaskId, });
