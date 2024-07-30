@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lykke.MarginTrading.SettingsService.Contracts" Version="1.5.0" />
-    <PackageReference Include="LykkeBiz.Cqrs" Version="12.0.3" />
-    <PackageReference Include="LykkeBiz.RabbitMqBroker" Version="13.6.0" />
+    <PackageReference Include="Lykke.MarginTrading.SettingsService.Contracts" />
+    <PackageReference Include="LykkeBiz.Cqrs" />
+    <PackageReference Include="LykkeBiz.RabbitMqBroker" />
   </ItemGroup>
 
   <ItemGroup>
