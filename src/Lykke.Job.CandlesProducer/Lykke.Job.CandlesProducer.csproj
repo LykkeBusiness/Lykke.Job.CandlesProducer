@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -26,7 +26,6 @@
     <PackageReference Include="Lykke.Logs" />
     <PackageReference Include="Lykke.Logs.MsSql" />
     <PackageReference Include="Lykke.Logs.Serilog" />
-    <PackageReference Include="Lykke.MarginTrading.CorporateActions.Broker.Contracts" />
     <PackageReference Include="Lykke.MarginTrading.SettingsService.Contracts" />
     <PackageReference Include="Lykke.Middlewares" />
     <PackageReference Include="Lykke.SlackNotification.AzureQueue" />
@@ -34,7 +33,6 @@
     <PackageReference Include="Lykke.Snow.Common.Startup" />
     <PackageReference Include="LykkeBiz.HttpClientGenerator" />
     <PackageReference Include="LykkeBiz.SettingsReader" />
-    <PackageReference Include="LykkeBiz.Snow.Cqrs" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" />
     <PackageReference Include="Microsoft.Extensions.Configuration" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
@@ -49,8 +47,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Lykke.Job.CandlesProducer.SqlRepositories\Lykke.Job.CandlesProducer.SqlRepositories.csproj" />
-    <ProjectReference Include="..\Lykke.Job.CandlesProducer.AzureRepositories\Lykke.Job.CandlesProducer.AzureRepositories.csproj" />
+    <ProjectReference
+      Include="..\..\Lykke.Job.CandlesProducer.SqlRepositories\Lykke.Job.CandlesProducer.SqlRepositories.csproj" />
+    <ProjectReference
+      Include="..\Lykke.Job.CandlesProducer.AzureRepositories\Lykke.Job.CandlesProducer.AzureRepositories.csproj" />
     <ProjectReference Include="..\Lykke.Job.CandlesProducer.Core\Lykke.Job.CandlesProducer.Core.csproj" />
     <ProjectReference Include="..\Lykke.Job.CandlesProducer.Services\Lykke.Job.CandlesProducer.Services.csproj" />
   </ItemGroup>
