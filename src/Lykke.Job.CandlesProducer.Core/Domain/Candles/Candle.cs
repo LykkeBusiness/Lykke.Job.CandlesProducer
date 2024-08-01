@@ -169,19 +169,21 @@ namespace Lykke.Job.CandlesProducer.Core.Domain.Candles
             }
 
             if (TimeInterval != CandleTimeInterval.Month || TimeInterval != CandleTimeInterval.Week) return this;
-            
+
             var low = Low;
             var high = High;
-            
+            var open = Open;
+
+            open *= rFactor;
             if (rFactor > 1)
             {
-                low = Low * rFactor;
+                low *= rFactor;
             }
             else
             {
-                high = High * rFactor;
+                high *= rFactor;
             }
-            
+
             return new Candle(
                 AssetPairId,
                 PriceType,
@@ -189,8 +191,8 @@ namespace Lykke.Job.CandlesProducer.Core.Domain.Candles
                 Timestamp,
                 timestamp,
                 OpenTimestamp,
-                Open * rFactor,
-                Close * rFactor,
+                open,
+                Close,
                 low,
                 high,
                 TradingVolume,

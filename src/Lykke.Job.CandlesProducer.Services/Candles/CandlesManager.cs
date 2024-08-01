@@ -267,62 +267,27 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
             }
         }
 
-        public async Task UpdateMonthlyOrWeeklyRFactor(string assetPair, double rFactor,
-            DateTime rFactorDate, DateTime lastTradingDate)
+        public async Task UpdateRFactor(string assetPair, double rFactor, CandleTimeInterval interval)
         {
             var timestamp = DateTime.UtcNow;
             var changedUpdates = new ConcurrentBag<CandleUpdateResult>();
             var candles = _candlesGenerator.GetState()
                 .Values
-                .Where(x => x.AssetPairId == assetPair)
-                .ToList();
-
-            var weeklyCandles = candles
-                .Where(x => x.TimeInterval == CandleTimeInterval.Week)
-                .ToList();
-
-            var monthlyCandles = candles
-                .Where(x => x.TimeInterval == CandleTimeInterval.Month)
+                .Where(x => x.AssetPairId == assetPair && x.TimeInterval == interval)
                 .ToList();
 
             try
             {
-                // Updates all intervals in parallel
-
-                var processingTasks = new List<Task>();
-
-                var diff = (rFactorDate - lastTradingDate).Days;
-                if (diff <= 7)
-                {
-                    processingTasks.AddRange(StartCandleUpdate(weeklyCandles, 
-                        candle => 
-                            _candlesGenerator.UpdateMonthlyOrWeeklyRFactor(
+                var tasks = StartCandleUpdate(candles,
+                    candle =>
+                        _candlesGenerator.UpdateMonthlyOrWeeklyRFactor(
                             candle,
                             timestamp,
-                            rFactor), 
-                        changedUpdates));
-
-                    processingTasks.AddRange(StartCandleUpdate(monthlyCandles, 
-                        candle => 
-                            _candlesGenerator.UpdateMonthlyOrWeeklyRFactor(
-                                candle,
-                                timestamp,
-                                rFactor), 
-                        changedUpdates));
-                }
-                else if (diff <= 30)
-                {
-                    processingTasks.AddRange(StartCandleUpdate(monthlyCandles, 
-                        candle => 
-                            _candlesGenerator.UpdateMonthlyOrWeeklyRFactor(
-                                candle,
-                                timestamp,
-                                rFactor), 
-                        changedUpdates));
-                }
+                            rFactor),
+                    changedUpdates);
 
 
-                await Task.WhenAll(processingTasks);
+                await Task.WhenAll(tasks);
 
                 // Publishes updated candles
 
