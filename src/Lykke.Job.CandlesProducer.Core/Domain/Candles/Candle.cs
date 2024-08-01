@@ -168,7 +168,7 @@ namespace Lykke.Job.CandlesProducer.Core.Domain.Candles
                 throw new ArgumentException("Timestamp shouldn't be less than LatestChangeTimestamp.");
             }
 
-            if (TimeInterval != CandleTimeInterval.Month || TimeInterval != CandleTimeInterval.Week) return this;
+            if (TimeInterval != CandleTimeInterval.Month && TimeInterval != CandleTimeInterval.Week) return this;
 
             var low = Low;
             var high = High;
