@@ -101,7 +101,7 @@ namespace Lykke.Job.CandlesProducer.Modules
                 .ListeningCommands(
                     typeof(UpdateCurrentCandlesCommand)
                 )
-                .On(DefaultPipeline)
+                .On(DefaultRoute)
                 .WithCommandsHandler<RFactorCommandsHandler>()
                 .PublishingEvents(
                     typeof(CurrentCandlesUpdatedEvent)
