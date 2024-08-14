@@ -24,6 +24,7 @@ using Lykke.Logs.Slack;
 using Lykke.Middlewares;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
+using Lykke.Snow.Common.Correlation;
 using Lykke.Snow.Common.Startup.Hosting;
 using Lykke.Snow.Common.Startup.Log;
 using MarginTrading.SettingsService.Contracts;
@@ -84,6 +85,7 @@ namespace Lykke.Job.CandlesProducer
                 _mtSettingsManager);
 
             services.AddSingleton<ILoggerFactory>(x => new WebHostLoggerFactory(Log));
+            services.AddCorrelation();
 
             services.AddApplicationInsightsTelemetry();
         }
@@ -154,7 +156,8 @@ namespace Lykke.Job.CandlesProducer
                 context.Request.EnableBuffering();
                 await next();
             });
-            
+
+            app.UseCorrelation();
             app.UseMiddleware<ExceptionHandlerMiddleware>();
 
             app.UseRouting();
