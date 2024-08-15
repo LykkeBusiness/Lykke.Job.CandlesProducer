@@ -1,16 +1,32 @@
+## 2.7.0 - Nova 2. Delivery 44 (August 15, 2024)
+### What's changed
+* LT-5518: Update rabbitmq broker library with new rabbitmq.client and templates.
+
+### Deployment
+Please ensure that the mirroring policy is configured on the RabbitMQ server side for the following queues:
+- `lykke.mt.pricefeed.candlesproducer`
+- `lykke.mt.trades.candlesproducer-v2`
+
+These queues require the mirroring policy to be enabled as part of our ongoing initiative to enhance system reliability. They are now classified as "no loss" queues, which necessitates proper configuration. The mirroring feature must be enabled on the RabbitMQ server side.
+
+In some cases, you may encounter an error indicating that the server-side configuration of a queue differs from the client’s expected configuration. If this occurs, please delete the queue, allowing it to be automatically recreated by the client.
+
+**Warning 1**: The "no loss" configuration is only valid if the mirroring policy is enabled on the server side.
+
+**Warning 2**: The particular queue might or might not exist in your environment depending on the configuration. 
+
+Please be aware that the provided queue names may include environment-specific identifiers (e.g., dev, test, prod). Be sure to replace these with the actual environment name in use. The same applies to instance names embedded within the queue names (e.g., DefaultEnv, etc.).
+
+
 ## 2.6.0 - Nova 2. Delivery 41 (March 29, 2024)
 ### What's changed
 * LT-5446: Update packages.
-
-
 
 
 ## 2.5.0 - Nova 2. Delivery 40 (February 28, 2024)
 ### What's changed
 * LT-5291: Step: update version number is failed.
 * LT-5201: Update lykke.httpclientgenerator to 5.6.2.
-
-
 
 
 ## 2.4.0 - Nova 2. Delivery 39 (January 29, 2024)
