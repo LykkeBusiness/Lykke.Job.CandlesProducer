@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Lykke.AzureStorage" Version="8.13.4" />
+    <PackageReference Include="Lykke.Common" Version="7.6.0" />
     <PackageReference Include="MessagePack" Version="1.9.11" />
   </ItemGroup>
 
