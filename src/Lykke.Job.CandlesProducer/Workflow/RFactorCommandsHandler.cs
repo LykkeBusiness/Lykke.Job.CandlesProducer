@@ -1,6 +1,7 @@
 // Copyright (c) 2019 Lykke Corp.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Threading.Tasks;
 using CorporateActions.Broker.Contracts.Workflow;
 using JetBrains.Annotations;
@@ -38,44 +39,32 @@ namespace Lykke.Job.CandlesProducer.Workflow
 
             if (asset == null)
             {
-                _logger.LogWarning("Product {ProductId is not found}. RFactor saga with id {Id} will be stopped",
-                    command.ProductId,
-                    command.TaskId);
-                return;
+                throw new Exception(
+                    $"Product {command.ProductId}. Cannot update current candles for rFactor task with id {command.TaskId}");
             }
 
-            if (command.UpdateAllCandles)
+            if (command.RFactorDate.Date == command.LastTradingDay.Date)
             {
                 await _candlesManager.UpdateRFactor(command.ProductId, decimal.ToDouble(command.RFactor));
             }
             else
             {
-                if (command.UpdateMonthlyCandles)
-                {
-                    await _candlesManager.UpdateRFactor(command.ProductId,
-                        decimal.ToDouble(command.RFactor),
-                        CandleTimeInterval.Month);
-                }
-
-                if (command.UpdateWeeklyCandles)
+                if (command.RFactorDate.SameWeek(command.LastTradingDay, DayOfWeek.Monday))
                 {
                     await _candlesManager.UpdateRFactor(command.ProductId,
                         decimal.ToDouble(command.RFactor),
                         CandleTimeInterval.Week);
                 }
+
+                if (command.RFactorDate.SameMonth(command.LastTradingDay))
+                {
+                    await _candlesManager.UpdateRFactor(command.ProductId,
+                        decimal.ToDouble(command.RFactor),
+                        CandleTimeInterval.Month);
+                }
             }
 
-            publisher.PublishEvent(new CurrentCandlesUpdatedEvent()
-            {
-                TaskId = command.TaskId,
-                ProductId = command.ProductId,
-                RFactor = command.RFactor,
-                RFactorDate = command.RFactorDate,
-                LastTradingDay = command.LastTradingDay,
-                UpdateAllCandles = command.UpdateAllCandles,
-                UpdateMonthlyCandles = command.UpdateMonthlyCandles,
-                UpdateWeeklyCandles = command.UpdateWeeklyCandles,
-            });
+            publisher.PublishEvent(new CurrentCandlesUpdatedEvent() { TaskId = command.TaskId, });
         }
     }
 }
