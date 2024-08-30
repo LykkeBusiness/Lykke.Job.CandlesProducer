@@ -8,39 +8,48 @@ using Common.Log;
 using Lykke.Cqrs;
 using Lykke.Job.CandlesProducer.Core.Services;
 using Lykke.Job.CandlesProducer.Core.Services.Candles;
-using Lykke.Job.CandlesProducer.Core.Services.Quotes;
-using Lykke.Job.CandlesProducer.Core.Services.Trades;
+using Lykke.Job.CandlesProducer.Services.Quotes.Mt.Messages;
+using Lykke.Job.CandlesProducer.Services.Trades.Mt.Messages;
+using Lykke.Job.CandlesProducer.Services.Trades.Spot.Messages;
+using Lykke.Job.QuotesProducer.Contract;
+using Lykke.RabbitMqBroker.Subscriber;
 
 namespace Lykke.Job.CandlesProducer.Services
 {
-    // TODO: Start MT trades subscriber
-
     public class StartupManager : IStartupManager
     {
-        private readonly IQuotesSubscriber _quotesSubscriber;
-        private readonly ITradesSubscriber _tradesSubscriber;
-        private readonly IEnumerable<ICandlesPublisher> _candlesPublishers;
         private readonly IEnumerable<ISnapshotSerializer> _snapshotSerializers;
+        
+        private readonly RabbitMqListener<QuoteMessage> _quoteMessageListener;
+        private readonly RabbitMqListener<MtQuoteMessage> _mtQuoteMessageListener;
+        private readonly RabbitMqListener<LimitOrdersMessage> _limitOrdersMessageListener;
+        private readonly RabbitMqListener<MtTradeMessage> _mtTradeMessageListener;
+        
+        private readonly IEnumerable<ICandlesPublisher> _candlesPublishers;
         private readonly IDefaultCandlesPublisher _defaultCandlesPublisher;
         private readonly ICqrsEngine _cqrsEngine;
         private readonly ILog _log;
 
         public StartupManager(
-            IQuotesSubscriber quotesSubscriber,
-            ITradesSubscriber tradesSubscriber,
             IEnumerable<ISnapshotSerializer> snapshotSerializers,
+            ILog log,
             IEnumerable<ICandlesPublisher> candlesPublishers,
             IDefaultCandlesPublisher defaultCandlesPublisher,
             ICqrsEngine cqrsEngine,
-            ILog log)
+            RabbitMqListener<QuoteMessage> quoteMessageListener = null,
+            RabbitMqListener<MtQuoteMessage> mtQuoteMessageListener = null,
+            RabbitMqListener<LimitOrdersMessage> limitOrdersMessageListener = null,
+            RabbitMqListener<MtTradeMessage> mtTradeMessageListener = null)
         {
-            _quotesSubscriber = quotesSubscriber;
-            _tradesSubscriber = tradesSubscriber;
-            _candlesPublishers = candlesPublishers;
             _snapshotSerializers = snapshotSerializers;
-            _defaultCandlesPublisher = defaultCandlesPublisher;
             _cqrsEngine = cqrsEngine;
             _log = log;
+            _quoteMessageListener = quoteMessageListener;
+            _mtQuoteMessageListener = mtQuoteMessageListener;
+            _limitOrdersMessageListener = limitOrdersMessageListener;
+            _mtTradeMessageListener = mtTradeMessageListener;
+            _candlesPublishers = candlesPublishers;
+            _defaultCandlesPublisher = defaultCandlesPublisher;
         }
 
         public  async Task StartAsync()
@@ -48,31 +57,26 @@ namespace Lykke.Job.CandlesProducer.Services
             await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Deserializing snapshots async...");
 
             var snapshotTasks = _snapshotSerializers.Select(s => s.DeserializeAsync()).ToArray();
-
-            await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Starting candles publishers...");
-            
-            _cqrsEngine.StartAll();
-
-            _defaultCandlesPublisher.Start();
-
-            foreach (var candlesPublisher in _candlesPublishers)
-            {
-                candlesPublisher.Start();
-            }
-            
-            _cqrsEngine.StartAll();
             
             await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Waiting for snapshots async...");
 
             await Task.WhenAll(snapshotTasks);
+            
+            await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Starting candles publishers...");
+            _defaultCandlesPublisher.Start();
+            foreach (var candlesPublisher in _candlesPublishers)
+            {
+                candlesPublisher.Start();
+            }
 
-            await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Starting quotes subscriber...");
-
-            _quotesSubscriber.Start();
-
-            await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Starting trades subscriber...");
-
-            _tradesSubscriber.Start();
+            await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Starting cqrs engine...");
+            _cqrsEngine.StartAll();
+            
+            await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Starting candles listeners...");
+            _quoteMessageListener?.Start();
+            _mtQuoteMessageListener?.Start();
+            _limitOrdersMessageListener?.Start();
+            _mtTradeMessageListener?.Start();
 
             await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Started up");
         }

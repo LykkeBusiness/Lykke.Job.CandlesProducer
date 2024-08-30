@@ -3,14 +3,13 @@
 
 using System;
 using Autofac;
-using Autofac.Extensions.DependencyInjection;
+
 using Lykke.Job.CandlesProducer.Core.Services;
 using Lykke.Job.CandlesProducer.Core.Services.Candles;
 using Lykke.Job.CandlesProducer.Services;
 using Lykke.Job.CandlesProducer.Services.Candles;
 using Lykke.Job.CandlesProducer.Settings;
 using MarginTrading.SettingsService.Contracts.Candles;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Lykke.Job.CandlesProducer.Modules
 {
@@ -18,7 +17,6 @@ namespace Lykke.Job.CandlesProducer.Modules
     {
         private readonly CandlesPublicationRabbitSettings _candlesPublicationRabbitSettings;
         private readonly CandlesProducerSettingsContract _candlesProducerSettings;
-        private readonly IServiceCollection _services;
         
         public CandlePublishersModule(
             CandlesPublicationRabbitSettings candlesPublicationRabbitSettings, 
@@ -26,7 +24,6 @@ namespace Lykke.Job.CandlesProducer.Modules
         {
             _candlesPublicationRabbitSettings = candlesPublicationRabbitSettings;
             _candlesProducerSettings = candlesProducerSettings;
-            _services = new ServiceCollection();
         }
 
         protected override void Load(ContainerBuilder builder)
@@ -59,8 +56,6 @@ namespace Lykke.Job.CandlesProducer.Modules
             builder.RegisterType<CandlesPublisherProvider>()
                 .As<ICandlesPublisherProvider>()
                 .SingleInstance();
-
-            builder.Populate(_services);
         }
     }
 }

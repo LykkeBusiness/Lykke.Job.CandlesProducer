@@ -1,23 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Common.Log;
 using Lykke.Job.CandlesProducer.Core.Services;
 using Lykke.RabbitMqBroker;
-using Lykke.RabbitMqBroker.Publisher;
 using Lykke.RabbitMqBroker.Publisher.Serializers;
-using Lykke.RabbitMqBroker.Subscriber;
 using Lykke.RabbitMqBroker.Subscriber.Deserializers;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Framing;
 
 namespace Lykke.Job.CandlesProducer.Services
 {
-    public class RabbitPoisonHandingService<T> : IRabbitPoisonHandingService<T>, IDisposable where T : class
+    public class RabbitPoisonHandingService<T> : IRabbitPoisonHandingService, IDisposable where T : class
     {
         private readonly ILog _log;
         private readonly RabbitMqSubscriptionSettings _subscriptionSettings;
@@ -70,7 +66,7 @@ namespace Lykke.Job.CandlesProducer.Services
 
                 var messagesFound = subscriptionChannel.MessageCount(PoisonQueueName);
                 var processedMessages = 0;
-                var result = "Undefined";
+                string result;
 
                 if (messagesFound == 0)
                 {
@@ -93,15 +89,18 @@ namespace Lykke.Job.CandlesProducer.Services
                 var consumer = new EventingBasicConsumer(subscriptionChannel);
                 consumer.Received += (ch, ea) =>
                 {
-                    var message = RepackMessage(ea.Body);
+                    var message = RepackMessage(ea.Body.ToArray());
 
                     if (message != null)
                     {
                         try
                         {
-                            var properties = !string.IsNullOrEmpty(_subscriptionSettings.RoutingKey)
-                                ? new BasicProperties { Type = _subscriptionSettings.RoutingKey }
-                                : null;
+                            IBasicProperties properties = null;
+                            if (!string.IsNullOrEmpty(_subscriptionSettings.RoutingKey))
+                            {
+                                properties = publishingChannel.CreateBasicProperties();
+                                properties.Type = _subscriptionSettings.RoutingKey;
+                            }
 
                             publishingChannel.BasicPublish(_subscriptionSettings.ExchangeName,
                                 _subscriptionSettings.RoutingKey ?? "", properties, message);
