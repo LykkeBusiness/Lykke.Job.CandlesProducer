@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
+using Lykke.Cqrs;
 using Lykke.Job.CandlesProducer.Core.Services;
 using Lykke.Job.CandlesProducer.Core.Services.Candles;
 using Lykke.Job.CandlesProducer.Core.Services.Quotes;
@@ -21,6 +22,7 @@ namespace Lykke.Job.CandlesProducer.Services
         private readonly IEnumerable<ICandlesPublisher> _candlesPublishers;
         private readonly IEnumerable<ISnapshotSerializer> _snapshotSerializers;
         private readonly IDefaultCandlesPublisher _defaultCandlesPublisher;
+        private readonly ICqrsEngine _cqrsEngine;
         private readonly ILog _log;
 
         public StartupManager(
@@ -29,6 +31,7 @@ namespace Lykke.Job.CandlesProducer.Services
             IEnumerable<ISnapshotSerializer> snapshotSerializers,
             IEnumerable<ICandlesPublisher> candlesPublishers,
             IDefaultCandlesPublisher defaultCandlesPublisher,
+            ICqrsEngine cqrsEngine,
             ILog log)
         {
             _quotesSubscriber = quotesSubscriber;
@@ -36,6 +39,7 @@ namespace Lykke.Job.CandlesProducer.Services
             _candlesPublishers = candlesPublishers;
             _snapshotSerializers = snapshotSerializers;
             _defaultCandlesPublisher = defaultCandlesPublisher;
+            _cqrsEngine = cqrsEngine;
             _log = log;
         }
 
@@ -47,12 +51,16 @@ namespace Lykke.Job.CandlesProducer.Services
 
             await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Starting candles publishers...");
             
+            _cqrsEngine.StartAll();
+
             _defaultCandlesPublisher.Start();
 
             foreach (var candlesPublisher in _candlesPublishers)
             {
                 candlesPublisher.Start();
             }
+            
+            _cqrsEngine.StartAll();
             
             await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Waiting for snapshots async...");
 

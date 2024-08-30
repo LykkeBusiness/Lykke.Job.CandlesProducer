@@ -86,7 +86,7 @@ namespace Lykke.Job.CandlesProducer.Modules
         
         private IRegistration RegisterContext()
         {
-            var contextRegistration = Register.BoundedContext(_contextNames.CorporateActionsBroker)
+            var contextRegistration = Register.BoundedContext(_contextNames.CandlesProducer)
                 .FailedCommandRetryDelay((long)_settings.RetryDelay.TotalMilliseconds)
                 .ProcessingOptions(DefaultRoute)
                 .MultiThreaded(_settings.CommandsHandlersThreadCount)
@@ -101,7 +101,7 @@ namespace Lykke.Job.CandlesProducer.Modules
                 .ListeningCommands(
                     typeof(UpdateCurrentCandlesCommand)
                 )
-                .On(DefaultPipeline)
+                .On(DefaultRoute)
                 .WithCommandsHandler<RFactorCommandsHandler>()
                 .PublishingEvents(
                     typeof(CurrentCandlesUpdatedEvent)
