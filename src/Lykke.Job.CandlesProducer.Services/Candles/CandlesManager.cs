@@ -6,6 +6,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
+using Common;
+
 using Lykke.Job.CandlesProducer.Core.Domain.Trades;
 using Lykke.Job.CandlesProducer.Core.Services.Assets;
 using Lykke.Job.CandlesProducer.Core.Services.Candles;
@@ -14,6 +17,8 @@ using Lykke.Job.CandlesProducer.Contract;
 using Lykke.Job.CandlesProducer.Core.Domain.Candles;
 using Lykke.Job.CandlesProducer.Core.Domain.Quotes;
 using Lykke.Job.QuotesProducer.Contract;
+
+using Microsoft.Extensions.Logging;
 
 namespace Lykke.Job.CandlesProducer.Services.Candles
 {
@@ -24,6 +29,7 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
         private readonly IAssetPairsManager _assetPairsManager;
         private readonly ICandlesGenerator _candlesGenerator;
         private readonly ICandlesPublisherProvider _candlesPublisherProvider;
+        private readonly ILogger<CandlesManager> _logger;
         private readonly CandleTimeInterval[] _intervals;
         private readonly bool _generateBidAndAsk;
 
@@ -33,7 +39,8 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
             ICandlesGenerator candlesGenerator,
             CandleTimeInterval[] intervals,
             bool generateBidAndAsk,
-            ICandlesPublisherProvider candlesPublisherProvider)
+            ICandlesPublisherProvider candlesPublisherProvider,
+            ILogger<CandlesManager> logger)
         {
             _midPriceQuoteGenerator = midPriceQuoteGenerator;
             _assetPairsManager = assetPairsManager;
@@ -41,6 +48,7 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
             _intervals = intervals;
             _generateBidAndAsk = generateBidAndAsk;
             _candlesPublisherProvider = candlesPublisherProvider;
+            _logger = logger;
         }
 
         public async Task ProcessMtQuoteAsync(MtQuoteDto mtQuote)
@@ -275,6 +283,14 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
                 .Values
                 .Where(x => x.AssetPairId == assetPair && x.TimeInterval == interval)
                 .ToList();
+            
+            _logger.LogInformation("{Method}: product {Product}, rFactor {rFactor}, interval {interval}. Found candles: {Candles}", 
+                nameof(UpdateRFactor), 
+                assetPair,
+                rFactor,
+                interval.ToString(),
+                candles.ToJson()
+                );
 
             try
             {
@@ -293,6 +309,13 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
 
                 if (!changedUpdates.IsEmpty)
                 {
+                    _logger.LogInformation("{Method}: product {Product}, rFactor {rFactor}, interval {interval}. Changed candles: {Candles}", 
+                        nameof(UpdateRFactor), 
+                        assetPair,
+                        rFactor,
+                        interval.ToString(),
+                        changedUpdates.ToJson()
+                    );
                     var publisher = await _candlesPublisherProvider.GetForAssetPair(assetPair);
                     await publisher.PublishAsync(changedUpdates);
                 }

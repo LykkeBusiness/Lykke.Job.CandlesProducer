@@ -45,12 +45,14 @@ namespace Lykke.Job.CandlesProducer.Workflow
 
             if (command.RFactorDate.Date == command.LastTradingDay.Date)
             {
+                _logger.LogInformation("Updating RFactor for product {Product}, RFactorDate == LastTradingDay", command.ProductId);
                 await _candlesManager.UpdateRFactor(command.ProductId, decimal.ToDouble(command.RFactor));
             }
             else
             {
                 if (command.RFactorDate.SameWeek(command.LastTradingDay, DayOfWeek.Monday))
                 {
+                    _logger.LogInformation("Updating RFactor for product {Product}, RFactorDate same >week< as LastTradingDay", command.ProductId);
                     await _candlesManager.UpdateRFactor(command.ProductId,
                         decimal.ToDouble(command.RFactor),
                         CandleTimeInterval.Week);
@@ -58,6 +60,7 @@ namespace Lykke.Job.CandlesProducer.Workflow
 
                 if (command.RFactorDate.SameMonth(command.LastTradingDay))
                 {
+                    _logger.LogInformation("Updating RFactor for product {Product}, RFactorDate same >month< as LastTradingDay", command.ProductId);
                     await _candlesManager.UpdateRFactor(command.ProductId,
                         decimal.ToDouble(command.RFactor),
                         CandleTimeInterval.Month);
