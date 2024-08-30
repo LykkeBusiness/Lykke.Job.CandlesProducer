@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
+using Lykke.Cqrs;
 using Lykke.Job.CandlesProducer.Core.Services;
 using Lykke.Job.CandlesProducer.Core.Services.Candles;
 using Lykke.Job.CandlesProducer.Services.Quotes.Mt.Messages;
@@ -26,7 +27,7 @@ namespace Lykke.Job.CandlesProducer.Services
         
         private readonly IEnumerable<ICandlesPublisher> _candlesPublishers;
         private readonly IDefaultCandlesPublisher _defaultCandlesPublisher;
-        
+        private readonly ICqrsEngine _cqrsEngine;
         private readonly ILog _log;
 
         public StartupManager(
@@ -34,12 +35,14 @@ namespace Lykke.Job.CandlesProducer.Services
             ILog log,
             IEnumerable<ICandlesPublisher> candlesPublishers,
             IDefaultCandlesPublisher defaultCandlesPublisher,
+            ICqrsEngine cqrsEngine,
             RabbitMqListener<QuoteMessage> quoteMessageListener = null,
             RabbitMqListener<MtQuoteMessage> mtQuoteMessageListener = null,
             RabbitMqListener<LimitOrdersMessage> limitOrdersMessageListener = null,
             RabbitMqListener<MtTradeMessage> mtTradeMessageListener = null)
         {
             _snapshotSerializers = snapshotSerializers;
+            _cqrsEngine = cqrsEngine;
             _log = log;
             _quoteMessageListener = quoteMessageListener;
             _mtQuoteMessageListener = mtQuoteMessageListener;
@@ -65,6 +68,9 @@ namespace Lykke.Job.CandlesProducer.Services
             {
                 candlesPublisher.Start();
             }
+
+            await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Starting cqrs engine...");
+            _cqrsEngine.StartAll();
             
             await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Starting candles listeners...");
             _quoteMessageListener?.Start();

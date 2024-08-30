@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Lykke.Job.CandlesProducer.Core.Domain.Trades;
@@ -31,7 +32,7 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
             IAssetPairsManager assetPairsManager,
             ICandlesGenerator candlesGenerator,
             CandleTimeInterval[] intervals,
-            bool generateBidAndAsk, 
+            bool generateBidAndAsk,
             ICandlesPublisherProvider candlesPublisherProvider)
         {
             _midPriceQuoteGenerator = midPriceQuoteGenerator;
@@ -46,14 +47,14 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
         {
             if (mtQuote == null)
                 throw new ArgumentNullException(nameof(mtQuote));
-            
+
             var assetPair = await _assetPairsManager.TryGetEnabledPairAsync(mtQuote.AssetPair?.Trim());
 
             if (assetPair == null)
             {
                 return;
             }
-            
+
             var changedUpdates = new ConcurrentBag<CandleUpdateResult>();
             var midPriceQuote = _midPriceQuoteGenerator.TryGenerate(
                 mtQuote.AssetPair,
@@ -113,7 +114,7 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
                 throw;
             }
         }
-        
+
         public async Task ProcessSpotQuoteAsync(QuoteMessage quote)
         {
             var assetPair = await _assetPairsManager.TryGetEnabledPairAsync(quote.AssetPair);
@@ -188,7 +189,7 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
                             trade.Price,
                             trade.BaseVolume,
                             trade.QuotingVolume,
-                            timeInterval, 
+                            timeInterval,
                             changedUpdates);
                     }));
 
@@ -227,27 +228,21 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
             var timestamp = DateTime.UtcNow;
             var changedUpdates = new ConcurrentBag<CandleUpdateResult>();
             var candles = _candlesGenerator.GetState()
-                    .Values
-                    .Where(x => x.AssetPairId == assetPair)
-                    .ToList();
+                .Values
+                .Where(x => x.AssetPairId == assetPair)
+                .ToList();
 
             try
             {
                 // Updates all intervals in parallel
 
-                var processingTasks = candles
-                    .Select(candle => Task.Factory.StartNew(() =>
-                    {
-                        var candleUpdateResult = _candlesGenerator.UpdateRFactor(
+                var processingTasks = StartCandleUpdate(candles,
+                    candle =>
+                        _candlesGenerator.UpdateRFactor(
                             candle,
                             timestamp,
-                            rFactor);
-
-                        if (candleUpdateResult.WasChanged)
-                        {
-                            changedUpdates.Add(candleUpdateResult);
-                        }
-                    }));
+                            rFactor),
+                    changedUpdates);
 
                 await Task.WhenAll(processingTasks);
 
@@ -270,6 +265,65 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
 
                 throw;
             }
+        }
+
+        public async Task UpdateRFactor(string assetPair, double rFactor, CandleTimeInterval interval)
+        {
+            var timestamp = DateTime.UtcNow;
+            var changedUpdates = new ConcurrentBag<CandleUpdateResult>();
+            var candles = _candlesGenerator.GetState()
+                .Values
+                .Where(x => x.AssetPairId == assetPair && x.TimeInterval == interval)
+                .ToList();
+
+            try
+            {
+                var tasks = StartCandleUpdate(candles,
+                    candle =>
+                        _candlesGenerator.UpdateMonthlyOrWeeklyRFactor(
+                            candle,
+                            timestamp,
+                            rFactor),
+                    changedUpdates);
+
+
+                await Task.WhenAll(tasks);
+
+                // Publishes updated candles
+
+                if (!changedUpdates.IsEmpty)
+                {
+                    var publisher = await _candlesPublisherProvider.GetForAssetPair(assetPair);
+                    await publisher.PublishAsync(changedUpdates);
+                }
+            }
+            catch (Exception)
+            {
+                // Failed to publish one or several candles, so processing should be cancelled
+
+                foreach (var updateResult in changedUpdates)
+                {
+                    _candlesGenerator.Undo(updateResult);
+                }
+
+                throw;
+            }
+        }
+
+        private IEnumerable<Task> StartCandleUpdate(List<ICandle> candles,
+            Func<ICandle, CandleUpdateResult> update,
+            ConcurrentBag<CandleUpdateResult> changedUpdates)
+        {
+            return candles
+                .Select(candle => Task.Factory.StartNew(() =>
+                {
+                    var candleUpdateResult = update(candle);
+
+                    if (candleUpdateResult.WasChanged)
+                    {
+                        changedUpdates.Add(candleUpdateResult);
+                    }
+                }));
         }
 
         private void ProcessQuoteInterval(
@@ -316,14 +370,16 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
             }
         }
 
-        private void ProcessTradeInterval(string assetPair, DateTime timestamp, double tradePrice, double baseVolume, double quotingVolume, CandleTimeInterval timeInterval, ConcurrentBag<CandleUpdateResult> changedUpdateResults)
+        private void ProcessTradeInterval(string assetPair, DateTime timestamp, double tradePrice, double baseVolume,
+            double quotingVolume, CandleTimeInterval timeInterval,
+            ConcurrentBag<CandleUpdateResult> changedUpdateResults)
         {
             var candleUpdateResult = _candlesGenerator.UpdateTradingCandle(
                 assetPair,
                 timestamp,
                 tradePrice,
-                baseVolume, 
-                quotingVolume, 
+                baseVolume,
+                quotingVolume,
                 timeInterval);
 
             if (candleUpdateResult.WasChanged)
