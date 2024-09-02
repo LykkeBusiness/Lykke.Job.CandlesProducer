@@ -1,3 +1,25 @@
+## 2.8.0 - Nova 2. Delivery 45 (September 02, 2024)
+### What's changed
+* LT-5565: Implement rfactor saga.
+
+### Deployment
+Add a new `Cqrs` section next to `AssetsCache` (`Cqrs` connection string should point to the broker-level rabbitmq instance)
+Example
+```
+    "AssetsCache": 
+    {
+      "ExpirationPeriod": "00:05:00",
+      "ApiKey": "apikey"
+    },
+    "Cqrs": 
+    {
+      "ConnectionString": "amqp://login:password@rabbit-mt.mt.svc.cluster.local:5672",
+      "RetryDelay": "00:00:02",
+      "EnvironmentName": "dev"
+    },
+```
+
+
 ## 2.7.0 - Nova 2. Delivery 44 (August 15, 2024)
 ### What's changed
 * LT-5518: Update rabbitmq broker library with new rabbitmq.client and templates.
