@@ -14,6 +14,7 @@ using Lykke.Job.CandlesProducer.Settings;
 using Lykke.Job.CandlesProducer.Workflow;
 using Lykke.Messaging.Serialization;
 using Lykke.Snow.Common.Correlation.Cqrs;
+using Lykke.Snow.Common.Startup;
 using Lykke.Snow.Cqrs;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -63,10 +64,10 @@ namespace Lykke.Job.CandlesProducer.Modules
                 Uri = new Uri(_settings.ConnectionString, UriKind.Absolute)
             };
             
-            var loggerFactory = ctx.Resolve<ILoggerFactory>();
+            var log = new LykkeLoggerAdapter<CqrsModule>(ctx.Resolve<ILogger<CqrsModule>>());
 
             var engine = new RabbitMqCqrsEngine(
-                loggerFactory,
+                log,
                 ctx.Resolve<IDependencyResolver>(),
                 new DefaultEndpointProvider(),
                 rabbitMqSettings.Endpoint.ToString(),
@@ -74,8 +75,8 @@ namespace Lykke.Job.CandlesProducer.Modules
                 rabbitMqSettings.Password,
                 true,
                 Register.DefaultEndpointResolver(rabbitMqConventionEndpointResolver),
-                Register.CommandInterceptors(new DefaultCommandLoggingInterceptor(loggerFactory)),
-                Register.EventInterceptors(new DefaultEventLoggingInterceptor(loggerFactory)),
+                Register.CommandInterceptors(new DefaultCommandLoggingInterceptor(log)),
+                Register.EventInterceptors(new DefaultEventLoggingInterceptor(log)),
                 RegisterContext());
             var correlationManager = ctx.Resolve<CqrsCorrelationManager>();
             engine.SetReadHeadersAction(correlationManager.FetchCorrelationIfExists);
