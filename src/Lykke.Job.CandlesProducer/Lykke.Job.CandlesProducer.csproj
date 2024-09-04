@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -26,6 +26,7 @@
     <PackageReference Include="Lykke.Logs" />
     <PackageReference Include="Lykke.Logs.MsSql" />
     <PackageReference Include="Lykke.Logs.Serilog" />
+    <PackageReference Include="Lykke.MarginTrading.CorporateActions.Broker.Contracts" />
     <PackageReference Include="Lykke.MarginTrading.SettingsService.Contracts" />
     <PackageReference Include="Lykke.Middlewares" />
     <PackageReference Include="Lykke.SlackNotification.AzureQueue" />
