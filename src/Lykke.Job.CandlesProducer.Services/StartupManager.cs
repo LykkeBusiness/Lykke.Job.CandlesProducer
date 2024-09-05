@@ -73,8 +73,6 @@ namespace Lykke.Job.CandlesProducer.Services
             await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Starting cqrs engine...");
             _cqrsEngine.StartAll();
             
-            _cqrsEngine.StartAll();
-            
             await _log.WriteInfoAsync(nameof(StartupManager), nameof(StartAsync), "", "Starting candles listeners...");
             _quoteMessageListener?.Start();
             _mtQuoteMessageListener?.Start();
