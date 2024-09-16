@@ -2,12 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-	  <Version>2.8.0</Version>
+    <Version>2.8.0</Version>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="Lykke.Job.QuotesProducer.Contract" />
     <PackageReference Include="Lykke.Service.Assets.Client" />
     <PackageReference Include="LykkeBiz.RabbitMqBroker" />
@@ -15,7 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\contract\Lykke.Job.CandlesProducer.Contract\Lykke.Job.CandlesProducer.Contract.csproj" />
+    <ProjectReference
+      Include="..\..\contract\Lykke.Job.CandlesProducer.Contract\Lykke.Job.CandlesProducer.Contract.csproj" />
   </ItemGroup>
 
 </Project>
