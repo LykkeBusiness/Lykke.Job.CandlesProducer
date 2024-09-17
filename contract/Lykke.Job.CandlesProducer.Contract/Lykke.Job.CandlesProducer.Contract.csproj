@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Version>2.8.0</Version>
     <Authors>Lykke</Authors>
     <Company>Lykke</Company>
@@ -12,30 +12,12 @@
     <RepositoryUrl>https://github.com/LykkeCity/Lykke.Job.CandlesProducer.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Lykke;Prices</PackageTags>
-    <LangVersion>8.0</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netstandard2.0\Lykke.Job.CandlesProducer.Contract.xml</DocumentationFile>
-    <NoWarn>1701;1702;1705;1591</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard2.0\Lykke.Job.CandlesProducer.Contract.xml</DocumentationFile>
-    <NoWarn>1701;1702;1705;1591</NoWarn>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
-    <PackageReference Include="Lykke.Common" Version="7.6.0" />
-    <PackageReference Include="MessagePack" Version="1.9.11" />
+    <PackageReference Include="LykkeBiz.Common" />
+    <PackageReference Include="MessagePack" />
   </ItemGroup>
 
-  <ItemGroup Label="dotnet pack instructions">
-    <Content Include="$(OutputPath)Lykke.Job.CandlesProducer.Contract.pdb">
-      <Pack>true</Pack>
-      <PackagePath>lib/netstandard2.0</PackagePath>
-    </Content>
-  </ItemGroup>
-  
 </Project>
