@@ -43,6 +43,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
     <PackageReference Include="Microsoft.Extensions.Configuration" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Refit" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
   </ItemGroup>
