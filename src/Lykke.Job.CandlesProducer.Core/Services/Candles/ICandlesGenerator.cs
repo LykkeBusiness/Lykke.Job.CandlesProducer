@@ -15,5 +15,13 @@ namespace Lykke.Job.CandlesProducer.Core.Services.Candles
         CandleUpdateResult UpdateQuotingCandle(string assetPair, DateTime timestamp, double price, CandlePriceType priceType, CandleTimeInterval timeInterval);
         CandleUpdateResult UpdateTradingCandle(string assetPair, DateTime timestamp, double tradePrice, double baseTradingVolume, double quotingTradingVolume, CandleTimeInterval timeInterval);
         void Undo(CandleUpdateResult candleUpdateResult);
+        CandleUpdateResult UpsertCandle(string assetPair, 
+            DateTime timestamp, 
+            double open, 
+            double close,
+            double low,
+            double high, 
+            CandlePriceType priceType, 
+            CandleTimeInterval timeInterval);
     }
 }
