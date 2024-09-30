@@ -32,10 +32,8 @@ public class CandlesController : ControllerBase, ICandlesApi
     public async Task<GetCandlesResponse> Get(string productId)
     {
         var state = _candlesState.GetState();
-        var keys = state.Keys.Where(x => x.StartsWith($"{productId}-"));
-        var candles = state
-            .Where(x => keys.Contains(x.Key))
-            .Select(x => x.Value)
+        var candles = state.Values
+            .Where(x => x.AssetPairId == productId)
             .Select(Map)
             .ToList();
 
@@ -47,10 +45,13 @@ public class CandlesController : ControllerBase, ICandlesApi
     [HttpPost]
     public Task UpsertCandle(UpsertCandleRequest request)
     {
-        _candlesGenerator.UpdateQuotingCandle(
+        _candlesGenerator.UpsertCandle(
             request.ProductId,
             request.Timestamp,
-            request.Price,
+            request.Open,
+            request.Close,
+            request.Low,
+            request.High,
             request.PriceType,
             request.TimeInterval);
 
