@@ -9,7 +9,10 @@ public class UpsertCandleRequest
 {
     public string ProductId { get; set; }
     public DateTime Timestamp { get; set; }
-    public double Price { get; set; }
+    public double Open { get; set; }
+    public double Close { get; set; }
+    public double Low { get; set; }
+    public double High { get; set; }
     public CandlePriceType PriceType { get; set; }
     public CandleTimeInterval TimeInterval { get; set; }
 }
