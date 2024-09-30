@@ -128,6 +128,56 @@ namespace Lykke.Job.CandlesProducer.Core.Domain.Candles
                 quotingTradingVolume
             );
         }
+        
+        /// <summary>
+        /// Only for debugging / testing purposes
+        /// </summary>
+        /// <param name="assetPair"></param>
+        /// <param name="timestamp"></param>
+        /// <param name="open"></param>
+        /// <param name="close"></param>
+        /// <param name="low"></param>
+        /// <param name="high"></param>
+        /// <param name="priceType"></param>
+        /// <param name="timeInterval"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static Candle CreateCandle(
+            string assetPair,
+            DateTime timestamp,
+            double open,
+            double close,
+            double low,
+            double high,
+            CandlePriceType priceType,
+            CandleTimeInterval timeInterval)
+        {
+            if (priceType != CandlePriceType.Ask &&
+                priceType != CandlePriceType.Bid &&
+                priceType != CandlePriceType.Mid)
+            {
+                throw new ArgumentOutOfRangeException(nameof(priceType), priceType,
+                    "Price type should be Ask, Bid or Mid for the quoting candle");
+            }
+
+            var intervalTimestamp = timestamp.TruncateTo(timeInterval);
+
+            return new Candle
+            (
+                assetPair,
+                priceType,
+                timeInterval,
+                intervalTimestamp,
+                timestamp,
+                timestamp,
+                open,
+                close,
+                low,
+                high,
+                0,
+                0
+            );
+        }
 
         public Candle UpdateRFactor(DateTime timestamp, double rFactor)
         {
@@ -270,6 +320,47 @@ namespace Lykke.Job.CandlesProducer.Core.Domain.Candles
                 highPrice,
                 TradingVolume + tradingVolume,
                 TradingOppositeVolume + tradingOppositeVolume);
+        }
+        
+        /// <summary>
+        /// Only for debugging / testing purposes
+        /// </summary>
+        /// <param name="timestamp"></param>
+        /// <param name="open"></param>
+        /// <param name="close"></param>
+        /// <param name="low"></param>
+        /// <param name="high"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public Candle ForceUpdateCandle(DateTime timestamp, 
+            double open,
+            double close,
+            double low,
+            double high)
+        {
+            if (PriceType != CandlePriceType.Ask &&
+                PriceType != CandlePriceType.Bid &&
+                PriceType != CandlePriceType.Mid)
+            {
+                throw new InvalidOperationException("Price type should be Ask, Bid or Mid for the quoting candle");
+            }
+
+            var changeTimestamp = LatestChangeTimestamp < timestamp ? timestamp : LatestChangeTimestamp;
+            var openTimestamp = OpenTimestamp > timestamp ? timestamp : OpenTimestamp;
+
+            return new Candle(
+                AssetPairId,
+                PriceType,
+                TimeInterval,
+                Timestamp,
+                changeTimestamp,
+                openTimestamp,
+                open,
+                close,
+                low,
+                high,
+                0,
+                0);
         }
 
         public bool Equals(Candle other)
