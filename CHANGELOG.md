@@ -1,3 +1,8 @@
+## 2.9.0 - Nova 2. Delivery 46 (September 26, 2024)
+### What's changed
+* LT-5603: Migrate to net 8.
+
+
 ## 2.8.0 - Nova 2. Delivery 45 (September 02, 2024)
 ### What's changed
 * LT-5565: Implement rfactor saga.

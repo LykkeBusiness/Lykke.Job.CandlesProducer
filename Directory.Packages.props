@@ -23,7 +23,7 @@
     <PackageVersion Include="Lykke.Snow.Common.Startup" Version="4.0.0" />
     <PackageVersion Include="Lykke.Snow.Common" Version="4.0.2" />
     <PackageVersion Include="LykkeBiz.HttpClientGenerator" Version="6.0.0" />
-    <PackageVersion Include="LykkeBiz.RabbitMqBroker" Version="14.0.0" />
+    <PackageVersion Include="LykkeBiz.RabbitMqBroker" Version="15.1.1" />
     <PackageVersion Include="LykkeBiz.SettingsReader" Version="9.0.0" />
     <PackageVersion Include="LykkeBiz.Snow.Cqrs" Version="5.1.0" />
     <PackageVersion Include="MessagePack" Version="1.9.11" />
