@@ -192,8 +192,6 @@ namespace Lykke.Job.CandlesProducer
         {
             try
             {
-                ApplicationContainer.Resolve<AssemblyLogger>().StartLogging();
-
                 var startupManager = ApplicationContainer.Resolve<IStartupManager>();
 
                 await startupManager.StartAsync();
