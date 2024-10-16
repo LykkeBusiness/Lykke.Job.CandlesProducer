@@ -53,10 +53,10 @@ namespace Lykke.Job.CandlesProducer.Modules
         private readonly IServiceCollection _services;
         private readonly QuotesSourceType _quotesSourceType;
 
-        public JobModule(CandlesProducerSettings settings, 
+        public JobModule(CandlesProducerSettings settings,
             IReloadingManager<DbSettings> dbSettings,
-            AssetsSettings assetsSettings, 
-            QuotesSourceType quotesSourceType, 
+            AssetsSettings assetsSettings,
+            QuotesSourceType quotesSourceType,
             ILog log)
         {
             _settings = settings;
@@ -72,15 +72,15 @@ namespace Lykke.Job.CandlesProducer.Modules
             builder.RegisterInstance(_log).As<ILog>().SingleInstance();
 
             builder.RegisterType<HealthService>().As<IHealthService>().SingleInstance();
-            
+
             builder.RegisterType<DefaultHttpStatusCodeMapper>().As<IHttpStatusCodeMapper>().SingleInstance();
-            
+
             builder.RegisterType<DefaultLogLevelMapper>().As<ILogLevelMapper>().SingleInstance();
 
             RegisterResourceMonitor(builder);
 
             RegisterAssetsServices(builder);
-            
+
             RegisterCandlesServices(builder);
 
             builder.Populate(_services);
@@ -150,7 +150,7 @@ namespace Lykke.Job.CandlesProducer.Modules
 
             builder.RegisterType<ShutdownManager>()
                 .As<IShutdownManager>();
-            
+
             _services.AddRabbitMqConnectionProvider();
 
             _services.AddSingleton(new SkipEodQuote(_settings.SkipEodQuote));
@@ -164,19 +164,18 @@ namespace Lykke.Job.CandlesProducer.Modules
                         _settings.Rabbit.QuotesSubscribtion,
                         "lykke",
                         "quotefeed");
-                    
-                    _services.AddSingleton<IRabbitPoisonHandingService>(provider => new RabbitPoisonHandingService<QuoteMessage>(
+
+                    _services.AddSingleton<IRabbitPoisonHandlingService>(provider => new RabbitPoisonHandlingService<QuoteMessage>(
                         provider.GetService<ILog>(),
                         subscriptionSettings));
 
-                    _services.AddSingleton<IQuotesPoisonHandingService>(provider => new QuotesPoisonHandingService(
-                        provider.GetService<IRabbitPoisonHandingService>()));
+                    _services.AddSingleton<IQuotesPoisonHandlingService>(provider => new QuotesPoisonHandlingService(
+                        provider.GetService<IRabbitPoisonHandlingService>()));
 
                     _services.AddRabbitMqListener<QuoteMessage, SpotQuotesHandler>(
-                        subscriptionSettings,
-                        ConfigureJsonNoLossListener,
-                        ConfigureMiddlewares,
-                        false);
+                            subscriptionSettings,
+                            ConfigureMiddlewares)
+                        .AddOptions(RabbitMqListenerOptions<QuoteMessage>.Json.NoLoss);
                 }
                 else
                 {
@@ -184,19 +183,18 @@ namespace Lykke.Job.CandlesProducer.Modules
                         _settings.Rabbit.QuotesSubscribtion,
                         "lykke.mt",
                         "pricefeed");
-                    
-                    _services.AddSingleton<IRabbitPoisonHandingService>(provider => new RabbitPoisonHandingService<MtQuoteMessage>(
+
+                    _services.AddSingleton<IRabbitPoisonHandlingService>(provider => new RabbitPoisonHandlingService<MtQuoteMessage>(
                         provider.GetService<ILog>(),
                         subscriptionSettings));
 
-                    _services.AddSingleton<IQuotesPoisonHandingService>(provider => new QuotesPoisonHandingService(
-                        provider.GetService<IRabbitPoisonHandingService>()));
+                    _services.AddSingleton<IQuotesPoisonHandlingService>(provider => new QuotesPoisonHandlingService(
+                        provider.GetService<IRabbitPoisonHandlingService>()));
 
                     _services.AddRabbitMqListener<MtQuoteMessage, MtQuotesHandler>(
-                        subscriptionSettings, 
-                        ConfigureJsonNoLossListener,
-                        ConfigureMiddlewares,
-                        false);
+                            subscriptionSettings,
+                            ConfigureMiddlewares)
+                        .AddOptions(RabbitMqListenerOptions<MtQuoteMessage>.Json.NoLoss);
                 }
             }
 
@@ -207,21 +205,20 @@ namespace Lykke.Job.CandlesProducer.Modules
                     "lykke",
                     "limitorders.clients",
                     "-v2");
-                
-                _services.AddSingleton<IRabbitPoisonHandingService>(
-                    provider => new RabbitPoisonHandingService<LimitOrdersMessage>(
+
+                _services.AddSingleton<IRabbitPoisonHandlingService>(
+                    provider => new RabbitPoisonHandlingService<LimitOrdersMessage>(
                         provider.GetService<ILog>(),
                         subscriptionSettings));
 
-                _services.AddSingleton<ITradesPoisonHandingService>(
-                    provider => new TradesPoisonHandingService(
-                        provider.GetService<IRabbitPoisonHandingService>()));
+                _services.AddSingleton<ITradesPoisonHandlingService>(
+                    provider => new TradesPoisonHandlingService(
+                        provider.GetService<IRabbitPoisonHandlingService>()));
 
                 _services.AddRabbitMqListener<LimitOrdersMessage, SpotTradesHandler>(
-                    subscriptionSettings,
-                    ConfigureJsonNoLossListener,
-                    ConfigureMiddlewares,
-                    false);
+                        subscriptionSettings,
+                        ConfigureMiddlewares)
+                    .AddOptions(RabbitMqListenerOptions<LimitOrdersMessage>.Json.NoLoss);
             }
             else
             {
@@ -230,21 +227,20 @@ namespace Lykke.Job.CandlesProducer.Modules
                     "lykke.mt",
                     "trades",
                     "-v2");
-                
-                _services.AddSingleton<IRabbitPoisonHandingService>(provider => new RabbitPoisonHandingService<MtTradeMessage>(
+
+                _services.AddSingleton<IRabbitPoisonHandlingService>(provider => new RabbitPoisonHandlingService<MtTradeMessage>(
                     provider.GetService<ILog>(),
                     subscriptionSettings));
 
-                _services.AddSingleton<ITradesPoisonHandingService>(provider => new TradesPoisonHandingService(
-                    provider.GetService<IRabbitPoisonHandingService>()));
+                _services.AddSingleton<ITradesPoisonHandlingService>(provider => new TradesPoisonHandlingService(
+                    provider.GetService<IRabbitPoisonHandlingService>()));
 
                 if (_settings.CandlesGenerator.GenerateTrades)
                 {
                     _services.AddRabbitMqListener<MtTradeMessage, MtTradesHandler>(
-                        subscriptionSettings,
-                        ConfigureJsonNoLossListener, 
-                        ConfigureMiddlewares,
-                        false);
+                            subscriptionSettings,
+                            ConfigureMiddlewares)
+                        .AddOptions(RabbitMqListenerOptions<MtTradeMessage>.Json.NoLoss);
                 }
             }
 
@@ -269,7 +265,7 @@ namespace Lykke.Job.CandlesProducer.Modules
                 builder.Register<ISnapshotRepository<IImmutableDictionary<string, IMarketState>>>(ctx =>
                         new SqlMidPriceQuoteGeneratorSnapshotRepository(_settings.Db.SnapshotsConnectionString))
                     .SingleInstance();
-                
+
                 builder.RegisterType<SnapshotSerializer<IImmutableDictionary<string, IMarketState>>>()
                     .As<ISnapshotSerializer>();
 
@@ -301,13 +297,6 @@ namespace Lykke.Job.CandlesProducer.Modules
                     .As<ISnapshotSerializer>()
                     .PreserveExistingDefaults();
             }
-        }
-        
-        private static void ConfigureJsonNoLossListener<T>(RabbitMqListenerOptions<T> options) where T : class
-        {
-            options.SerializationFormat = SerializationFormat.Json;
-            options.ShareConnection = true;
-            options.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
         }
 
         private static void ConfigureMiddlewares<T>(RabbitMqSubscriber<T> subscriber, IServiceProvider provider)
