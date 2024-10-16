@@ -2,18 +2,18 @@
 
 using Lykke.Job.CandlesProducer.Core.Services;
 
-namespace Lykke.Job.CandlesProducer.Services.Quotes;
+namespace Lykke.Job.CandlesProducer.Services.Trades;
 
-public class QuotesPoisonHandlingService : IQuotesPoisonHandlingService
+public class TradesPoisonHandlingService : ITradesPoisonHandlingService
 {
     private readonly IRabbitPoisonHandlingService _rabbitPoisonHandingService;
 
-    public QuotesPoisonHandlingService(IRabbitPoisonHandlingService rabbitPoisonHandingService)
+    public TradesPoisonHandlingService(IRabbitPoisonHandlingService rabbitPoisonHandingService)
     {
         _rabbitPoisonHandingService = rabbitPoisonHandingService;
     }
 
-    public async Task<string> PutQuotesBack()
+    public async Task<string> PutTradesBack()
     {
         return await _rabbitPoisonHandingService.PutMessagesBack();
     }

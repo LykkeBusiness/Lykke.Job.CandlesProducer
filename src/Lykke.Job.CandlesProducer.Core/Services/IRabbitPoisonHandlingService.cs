@@ -2,7 +2,7 @@
 
 namespace Lykke.Job.CandlesProducer.Core.Services
 {
-    public interface IRabbitPoisonHandingService
+    public interface IRabbitPoisonHandlingService
     {
         Task<string> PutMessagesBack();
     }

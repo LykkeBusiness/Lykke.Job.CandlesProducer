@@ -165,12 +165,12 @@ namespace Lykke.Job.CandlesProducer.Modules
                         "lykke",
                         "quotefeed");
 
-                    _services.AddSingleton<IRabbitPoisonHandingService>(provider => new RabbitPoisonHandingService<QuoteMessage>(
+                    _services.AddSingleton<IRabbitPoisonHandlingService>(provider => new RabbitPoisonHandlingService<QuoteMessage>(
                         provider.GetService<ILog>(),
                         subscriptionSettings));
 
-                    _services.AddSingleton<IQuotesPoisonHandingService>(provider => new QuotesPoisonHandingService(
-                        provider.GetService<IRabbitPoisonHandingService>()));
+                    _services.AddSingleton<IQuotesPoisonHandlingService>(provider => new QuotesPoisonHandlingService(
+                        provider.GetService<IRabbitPoisonHandlingService>()));
 
                     _services.AddRabbitMqListener<QuoteMessage, SpotQuotesHandler>(
                             subscriptionSettings,
@@ -184,12 +184,12 @@ namespace Lykke.Job.CandlesProducer.Modules
                         "lykke.mt",
                         "pricefeed");
 
-                    _services.AddSingleton<IRabbitPoisonHandingService>(provider => new RabbitPoisonHandingService<MtQuoteMessage>(
+                    _services.AddSingleton<IRabbitPoisonHandlingService>(provider => new RabbitPoisonHandlingService<MtQuoteMessage>(
                         provider.GetService<ILog>(),
                         subscriptionSettings));
 
-                    _services.AddSingleton<IQuotesPoisonHandingService>(provider => new QuotesPoisonHandingService(
-                        provider.GetService<IRabbitPoisonHandingService>()));
+                    _services.AddSingleton<IQuotesPoisonHandlingService>(provider => new QuotesPoisonHandlingService(
+                        provider.GetService<IRabbitPoisonHandlingService>()));
 
                     _services.AddRabbitMqListener<MtQuoteMessage, MtQuotesHandler>(
                             subscriptionSettings,
@@ -206,14 +206,14 @@ namespace Lykke.Job.CandlesProducer.Modules
                     "limitorders.clients",
                     "-v2");
 
-                _services.AddSingleton<IRabbitPoisonHandingService>(
-                    provider => new RabbitPoisonHandingService<LimitOrdersMessage>(
+                _services.AddSingleton<IRabbitPoisonHandlingService>(
+                    provider => new RabbitPoisonHandlingService<LimitOrdersMessage>(
                         provider.GetService<ILog>(),
                         subscriptionSettings));
 
-                _services.AddSingleton<ITradesPoisonHandingService>(
-                    provider => new TradesPoisonHandingService(
-                        provider.GetService<IRabbitPoisonHandingService>()));
+                _services.AddSingleton<ITradesPoisonHandlingService>(
+                    provider => new TradesPoisonHandlingService(
+                        provider.GetService<IRabbitPoisonHandlingService>()));
 
                 _services.AddRabbitMqListener<LimitOrdersMessage, SpotTradesHandler>(
                         subscriptionSettings,
@@ -228,12 +228,12 @@ namespace Lykke.Job.CandlesProducer.Modules
                     "trades",
                     "-v2");
 
-                _services.AddSingleton<IRabbitPoisonHandingService>(provider => new RabbitPoisonHandingService<MtTradeMessage>(
+                _services.AddSingleton<IRabbitPoisonHandlingService>(provider => new RabbitPoisonHandlingService<MtTradeMessage>(
                     provider.GetService<ILog>(),
                     subscriptionSettings));
 
-                _services.AddSingleton<ITradesPoisonHandingService>(provider => new TradesPoisonHandingService(
-                    provider.GetService<IRabbitPoisonHandingService>()));
+                _services.AddSingleton<ITradesPoisonHandlingService>(provider => new TradesPoisonHandlingService(
+                    provider.GetService<IRabbitPoisonHandlingService>()));
 
                 if (_settings.CandlesGenerator.GenerateTrades)
                 {
