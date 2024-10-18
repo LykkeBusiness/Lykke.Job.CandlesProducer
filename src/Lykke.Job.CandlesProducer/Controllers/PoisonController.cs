@@ -17,7 +17,10 @@ public class PoisonController : Controller
     {
         try
         {
-            return Ok(service.PutQuotesBack());
+            var text = service.PutQuotesBack();
+            return string.IsNullOrEmpty(text)
+                ? NotFound(ErrorResponse.Create("There are no messages to put back"))
+                : Ok(text);
         }
         catch (ProcessAlreadyStartedException ex)
         {
@@ -34,7 +37,10 @@ public class PoisonController : Controller
     {
         try
         {
-            return Ok(service.PutTradesBack());
+            var text = service.PutTradesBack();
+            return string.IsNullOrEmpty(text)
+                ? NotFound(ErrorResponse.Create("There are no messages to put back"))
+                : Ok(text);
         }
         catch (ProcessAlreadyStartedException ex)
         {
