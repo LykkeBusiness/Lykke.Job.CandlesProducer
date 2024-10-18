@@ -5,9 +5,12 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Lykke.Contracts.Responses;
+using Lykke.Job.CandlesProducer.Contract;
 using Lykke.Job.CandlesProducer.Contract.Candles;
 using Lykke.Job.CandlesProducer.Core.Domain.Candles;
 using Lykke.Job.CandlesProducer.Core.Services;
+using Lykke.Job.CandlesProducer.Core.Services.Assets;
 using Lykke.Job.CandlesProducer.Core.Services.Candles;
 
 using Microsoft.AspNetCore.Mvc;
@@ -18,13 +21,16 @@ namespace Lykke.Job.CandlesProducer.Controllers;
 public class CandlesController : ControllerBase, ICandlesApi
 {
     private readonly ICandlesGenerator _candlesGenerator;
+    private readonly IAssetPairsManager _assetPairsManager;
     private readonly IHaveState<ImmutableDictionary<string, ICandle>> _candlesState;
 
     public CandlesController(
         ICandlesGenerator candlesGenerator,
+        IAssetPairsManager assetPairsManager,
         IHaveState<ImmutableDictionary<string, ICandle>> candlesState)
     {
         _candlesGenerator = candlesGenerator;
+        _assetPairsManager = assetPairsManager;
         _candlesState = candlesState;
     }
 
@@ -43,8 +49,11 @@ public class CandlesController : ControllerBase, ICandlesApi
     }
 
     [HttpPost]
-    public Task UpsertCandle(UpsertCandleRequest request)
+    public async Task<ErrorCodeResponse<CandlesErrorCodesContract>> UpsertCandle([FromBody] UpsertCandleRequest request)
     {
+        var validationResult = await Validate(request);
+        if (validationResult != CandlesErrorCodesContract.None) return validationResult;
+
         _candlesGenerator.UpsertCandle(
             request.ProductId,
             request.Timestamp,
@@ -55,7 +64,34 @@ public class CandlesController : ControllerBase, ICandlesApi
             request.PriceType,
             request.TimeInterval);
 
-        return Task.CompletedTask;
+        return CandlesErrorCodesContract.None;
+    }
+
+    private async Task<CandlesErrorCodesContract> Validate(UpsertCandleRequest request)
+    {
+        if (request.Low > request.High)
+        {
+            return CandlesErrorCodesContract.InvalidLowOrHighPrice;
+        }
+
+        var assetPair = await _assetPairsManager.TryGetEnabledPairAsync(request.ProductId.Trim());
+
+        if (assetPair == null)
+        {
+            return CandlesErrorCodesContract.ProductNotFound;
+        }
+
+        if (request.PriceType == CandlePriceType.Unspecified || request.PriceType == CandlePriceType.Trades)
+        {
+            return CandlesErrorCodesContract.PriceTypeNotSupported;
+        }
+
+        if (request.TimeInterval == CandleTimeInterval.Unspecified)
+        {
+            return CandlesErrorCodesContract.TimeIntervalNotSupported;
+        }
+
+        return CandlesErrorCodesContract.None;
     }
 
     private static CandleContract Map(ICandle candle)

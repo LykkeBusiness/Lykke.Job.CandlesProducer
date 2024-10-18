@@ -36,6 +36,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
+using Newtonsoft.Json.Converters;
+
 namespace Lykke.Job.CandlesProducer
 {
     [UsedImplicitly]
@@ -69,6 +71,7 @@ namespace Lykke.Job.CandlesProducer
                 {
                     options.SerializerSettings.ContractResolver =
                         new Newtonsoft.Json.Serialization.DefaultContractResolver();
+                    options.SerializerSettings.Converters.Add(new StringEnumConverter());
                 });
 
             services.AddSwaggerGen(options =>
