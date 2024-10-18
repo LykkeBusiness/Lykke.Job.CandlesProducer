@@ -1,20 +1,10 @@
-﻿using System.Threading.Tasks;
-
-using Lykke.Job.CandlesProducer.Core.Services;
+﻿using Lykke.RabbitMqBroker;
 
 namespace Lykke.Job.CandlesProducer.Services.Trades;
 
-public class TradesPoisonHandlingService : ITradesPoisonHandlingService
+public class TradesPoisonHandlingService(IPoisonQueueHandler poisonQueueHandler) : ITradesPoisonHandlingService
 {
-    private readonly IRabbitPoisonHandlingService _rabbitPoisonHandingService;
+    private readonly IPoisonQueueHandler _poisonQueueHandler = poisonQueueHandler;
 
-    public TradesPoisonHandlingService(IRabbitPoisonHandlingService rabbitPoisonHandingService)
-    {
-        _rabbitPoisonHandingService = rabbitPoisonHandingService;
-    }
-
-    public async Task<string> PutTradesBack()
-    {
-        return await _rabbitPoisonHandingService.PutMessagesBack();
-    }
+    public string PutTradesBack() => _poisonQueueHandler.TryPutMessagesBack();
 }

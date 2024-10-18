@@ -4,5 +4,5 @@ namespace Lykke.Job.CandlesProducer.Services.Quotes;
 
 public interface IQuotesPoisonHandlingService
 {
-    Task<string> PutQuotesBack();
+    string PutQuotesBack();
 }

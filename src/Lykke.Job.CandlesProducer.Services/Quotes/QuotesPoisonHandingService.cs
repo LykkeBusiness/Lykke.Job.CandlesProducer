@@ -1,20 +1,10 @@
-﻿using System.Threading.Tasks;
-
-using Lykke.Job.CandlesProducer.Core.Services;
+﻿using Lykke.RabbitMqBroker;
 
 namespace Lykke.Job.CandlesProducer.Services.Quotes;
 
-public class QuotesPoisonHandlingService : IQuotesPoisonHandlingService
+public class QuotesPoisonHandlingService(IPoisonQueueHandler poisonQueueHandler) : IQuotesPoisonHandlingService
 {
-    private readonly IRabbitPoisonHandlingService _rabbitPoisonHandingService;
+    private readonly IPoisonQueueHandler _poisonQueueHandler = poisonQueueHandler;
 
-    public QuotesPoisonHandlingService(IRabbitPoisonHandlingService rabbitPoisonHandingService)
-    {
-        _rabbitPoisonHandingService = rabbitPoisonHandingService;
-    }
-
-    public async Task<string> PutQuotesBack()
-    {
-        return await _rabbitPoisonHandingService.PutMessagesBack();
-    }
+    public string PutQuotesBack() => _poisonQueueHandler.TryPutMessagesBack();
 }

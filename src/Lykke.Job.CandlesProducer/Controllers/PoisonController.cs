@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net;
 
 using Lykke.Common.Api.Contract.Responses;
-using Lykke.Job.CandlesProducer.Services;
 using Lykke.Job.CandlesProducer.Services.Quotes;
 using Lykke.Job.CandlesProducer.Services.Trades;
+using Lykke.RabbitMqBroker;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,30 +13,36 @@ namespace Lykke.Job.CandlesProducer.Controllers;
 public class PoisonController : Controller
 {
     [HttpPost("put-quotes-back")]
-    public async Task<IActionResult> PutQuotesBack(
-        [FromServices] IQuotesPoisonHandlingService service)
+    public IActionResult PutQuotesBack([FromServices] IQuotesPoisonHandlingService service)
     {
         try
         {
-            return Ok(await service.PutQuotesBack());
+            return Ok(service.PutQuotesBack());
         }
         catch (ProcessAlreadyStartedException ex)
         {
             return Conflict(ErrorResponse.Create(ex.Message));
+        }
+        catch (LockAcqTimeoutException ex)
+        {
+            return StatusCode((int)HttpStatusCode.InternalServerError, ErrorResponse.Create(ex.Message));
         }
     }
 
     [HttpPost("put-trades-back")]
-    public async Task<IActionResult> PutTradesBack(
-        [FromServices] ITradesPoisonHandlingService service)
+    public IActionResult PutTradesBack([FromServices] ITradesPoisonHandlingService service)
     {
         try
         {
-            return Ok(await service.PutTradesBack());
+            return Ok(service.PutTradesBack());
         }
         catch (ProcessAlreadyStartedException ex)
         {
             return Conflict(ErrorResponse.Create(ex.Message));
+        }
+        catch (LockAcqTimeoutException ex)
+        {
+            return StatusCode((int)HttpStatusCode.InternalServerError, ErrorResponse.Create(ex.Message));
         }
     }
 }
