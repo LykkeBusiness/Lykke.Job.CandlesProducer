@@ -88,6 +88,43 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
                     timeInterval
                 });
         }
+
+        /// <summary>
+        /// Only for debugging / testing purposes
+        /// </summary>
+        /// <param name="assetPair"></param>
+        /// <param name="timestamp"></param>
+        /// <param name="open"></param>
+        /// <param name="close"></param>
+        /// <param name="low"></param>
+        /// <param name="high"></param>
+        /// <param name="priceType"></param>
+        /// <param name="timeInterval"></param>
+        /// <returns></returns>
+        public CandleUpdateResult UpsertCandle(string assetPair, 
+            DateTime timestamp, 
+            double open, 
+            double close,
+            double low,
+            double high, 
+            CandlePriceType priceType, 
+            CandleTimeInterval timeInterval)
+        {
+            return Update(assetPair, timestamp, priceType, timeInterval,
+                createNewCandle: () => Candle.CreateCandle(assetPair, timestamp, open, close, low, high, priceType, timeInterval),
+                updateCandle: oldCandle => oldCandle.ForceUpdateCandle(timestamp, open, close, low, high),
+                getLoggingContext: candle => new
+                {
+                    assetPair,
+                    timestamp,
+                    open, 
+                    close, 
+                    low, 
+                    high,
+                    priceType,
+                    timeInterval
+                });
+        }
         
         public void Undo(CandleUpdateResult candleUpdateResult)
         {
