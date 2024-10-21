@@ -78,7 +78,8 @@ namespace Lykke.Job.CandlesProducer.Modules
                                 poisonQueueName: PoisonQueueName.Create(settings.QueueName),
                                 exchangeName: ExchangeName.Create(settings.ExchangeName),
                                 routingKey: RoutingKey.Create(settings.RoutingKey)
-                            )))));
+                            ),
+                            p.GetRequiredService<ILoggerFactory>()))));
         }
 
         public static IServiceCollection AddTradesPoisonHandler(
@@ -95,7 +96,8 @@ namespace Lykke.Job.CandlesProducer.Modules
                                 poisonQueueName: PoisonQueueName.Create(settings.QueueName),
                                 exchangeName: ExchangeName.Create(settings.ExchangeName),
                                 routingKey: RoutingKey.Create(settings.RoutingKey)
-                            )))));
+                            ),
+                            p.GetRequiredService<ILoggerFactory>()))));
         }
 
         private static void ConfigureMiddlewaresCallback<T>(RabbitMqSubscriber<T> subscriber, IServiceProvider provider)
