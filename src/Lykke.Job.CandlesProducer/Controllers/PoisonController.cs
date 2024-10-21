@@ -1,34 +1,54 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net;
+
+using Lykke.Common.Api.Contract.Responses;
 using Lykke.Job.CandlesProducer.Services.Quotes;
 using Lykke.Job.CandlesProducer.Services.Trades;
+using Lykke.RabbitMqBroker;
+
 using Microsoft.AspNetCore.Mvc;
 
-namespace Lykke.Job.CandlesProducer.Controllers
+namespace Lykke.Job.CandlesProducer.Controllers;
+
+[Route("api/[controller]")]
+public class PoisonController : Controller
 {
-    [Route("api/[controller]")]
-    public class PoisonController : Controller
+    [HttpPost("put-quotes-back")]
+    public IActionResult PutQuotesBack([FromServices] IQuotesPoisonHandlingService service)
     {
-        private readonly IQuotesPoisonHandingService _quotesPoisonHandingService;
-        private readonly ITradesPoisonHandingService _tradesPoisonHandingService;
-
-        public PoisonController(
-            IQuotesPoisonHandingService quotesPoisonHandingService,
-            ITradesPoisonHandingService tradesPoisonHandingService)
+        try
         {
-            _quotesPoisonHandingService = quotesPoisonHandingService;
-            _tradesPoisonHandingService = tradesPoisonHandingService;
+            var text = service.PutQuotesBack();
+            return string.IsNullOrEmpty(text)
+                ? NotFound(ErrorResponse.Create("There are no messages to put back"))
+                : Ok(text);
         }
-
-        [HttpPost("put-quotes-back")]
-        public async Task<string> PutQuotesBack()
+        catch (ProcessAlreadyStartedException ex)
         {
-            return await _quotesPoisonHandingService.PutQuotesBack();
+            return Conflict(ErrorResponse.Create(ex.Message));
         }
-
-        [HttpPost("put-trades-back")]
-        public async Task<string> PutTradesBack()
+        catch (LockAcqTimeoutException ex)
         {
-            return await _tradesPoisonHandingService.PutTradesBack();
+            return StatusCode((int)HttpStatusCode.InternalServerError, ErrorResponse.Create(ex.Message));
+        }
+    }
+
+    [HttpPost("put-trades-back")]
+    public IActionResult PutTradesBack([FromServices] ITradesPoisonHandlingService service)
+    {
+        try
+        {
+            var text = service.PutTradesBack();
+            return string.IsNullOrEmpty(text)
+                ? NotFound(ErrorResponse.Create("There are no messages to put back"))
+                : Ok(text);
+        }
+        catch (ProcessAlreadyStartedException ex)
+        {
+            return Conflict(ErrorResponse.Create(ex.Message));
+        }
+        catch (LockAcqTimeoutException ex)
+        {
+            return StatusCode((int)HttpStatusCode.InternalServerError, ErrorResponse.Create(ex.Message));
         }
     }
 }
