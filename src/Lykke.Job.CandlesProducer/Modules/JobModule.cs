@@ -174,9 +174,14 @@ namespace Lykke.Job.CandlesProducer.Modules
 
                     _services.AddRabbitMqListener<QuoteMessage, SpotQuotesHandler>(
                         subscriptionSettings,
-                        ConfigureJsonNoLossListener,
-                        ConfigureMiddlewares,
-                        false);
+                        ConfigureMiddlewares)
+                        .AddOptions(
+                            options =>
+                            {
+                                options.SerializationFormat = SerializationFormat.Json;
+                                options.ShareConnection = true;
+                                options.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
+                            });
                 }
                 else
                 {
@@ -193,10 +198,15 @@ namespace Lykke.Job.CandlesProducer.Modules
                         provider.GetService<IRabbitPoisonHandingService>()));
 
                     _services.AddRabbitMqListener<MtQuoteMessage, MtQuotesHandler>(
-                        subscriptionSettings, 
-                        ConfigureJsonNoLossListener,
-                        ConfigureMiddlewares,
-                        false);
+                        subscriptionSettings,
+                        ConfigureMiddlewares)
+                        .AddOptions(
+                            options =>
+                            {
+                                options.SerializationFormat = SerializationFormat.Json;
+                                options.ShareConnection = true;
+                                options.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
+                            });
                 }
             }
 
@@ -219,9 +229,14 @@ namespace Lykke.Job.CandlesProducer.Modules
 
                 _services.AddRabbitMqListener<LimitOrdersMessage, SpotTradesHandler>(
                     subscriptionSettings,
-                    ConfigureJsonNoLossListener,
-                    ConfigureMiddlewares,
-                    false);
+                    ConfigureMiddlewares)
+                    .AddOptions(
+                        options =>
+                        {
+                            options.SerializationFormat = SerializationFormat.Json;
+                            options.ShareConnection = true;
+                            options.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
+                        });
             }
             else
             {
@@ -241,10 +256,15 @@ namespace Lykke.Job.CandlesProducer.Modules
                 if (_settings.CandlesGenerator.GenerateTrades)
                 {
                     _services.AddRabbitMqListener<MtTradeMessage, MtTradesHandler>(
-                        subscriptionSettings,
-                        ConfigureJsonNoLossListener, 
-                        ConfigureMiddlewares,
-                        false);
+                        subscriptionSettings, 
+                        ConfigureMiddlewares)
+                        .AddOptions(
+                            options =>
+                            {
+                                options.SerializationFormat = SerializationFormat.Json;
+                                options.ShareConnection = true;
+                                options.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
+                            });
                 }
             }
 
@@ -301,13 +321,6 @@ namespace Lykke.Job.CandlesProducer.Modules
                     .As<ISnapshotSerializer>()
                     .PreserveExistingDefaults();
             }
-        }
-        
-        private static void ConfigureJsonNoLossListener<T>(RabbitMqListenerOptions<T> options) where T : class
-        {
-            options.SerializationFormat = SerializationFormat.Json;
-            options.ShareConnection = true;
-            options.SubscriptionTemplate = SubscriptionTemplate.NoLoss;
         }
 
         private static void ConfigureMiddlewares<T>(RabbitMqSubscriber<T> subscriber, IServiceProvider provider)

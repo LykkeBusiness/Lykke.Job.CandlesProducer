@@ -14,6 +14,8 @@ using Lykke.Job.CandlesProducer.Core.Services.Candles;
 using Lykke.RabbitMqBroker.Publisher;
 using Lykke.RabbitMqBroker.Publisher.Serializers;
 
+using MessagePack;
+
 namespace Lykke.Job.CandlesProducer.Services.Candles
 {
     [UsedImplicitly]
@@ -41,7 +43,7 @@ namespace Lykke.Job.CandlesProducer.Services.Candles
         public void Start()
         {
             _publisher = _publishersFactory.Create(
-                new MessagePackMessageSerializer<CandlesUpdatedEvent>(),
+                new MessagePackMessageSerializer<CandlesUpdatedEvent>((IFormatterResolver)null),
                 _connectionString,
                 _namespace,
                 $"candles-v2.{_shardName}");
