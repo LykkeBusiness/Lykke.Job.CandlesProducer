@@ -9,7 +9,8 @@ using Lykke.Job.CandlesProducer.Core.Services.Candles;
 using Lykke.Job.CandlesProducer.Services;
 using Lykke.Job.CandlesProducer.Services.Candles;
 using Lykke.Job.CandlesProducer.Settings;
-using MarginTrading.SettingsService.Contracts.Candles;
+
+using MarginTrading.AssetService.Contracts.Candles;
 
 namespace Lykke.Job.CandlesProducer.Modules
 {

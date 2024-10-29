@@ -27,7 +27,7 @@
     <PackageReference Include="LykkeBiz.Logs" />
     <PackageReference Include="LykkeBiz.Logs.MsSql" />
     <PackageReference Include="LykkeBiz.Logs.Serilog" />
-    <PackageReference Include="Lykke.MarginTrading.SettingsService.Contracts" />
+    <PackageReference Include="Lykke.MarginTrading.AssetService.Contracts" />
     <PackageReference Include="Lykke.Middlewares" />
     <PackageReference Include="Lykke.SlackNotification.AzureQueue" />
     <PackageReference Include="Lykke.Snow.Common" />

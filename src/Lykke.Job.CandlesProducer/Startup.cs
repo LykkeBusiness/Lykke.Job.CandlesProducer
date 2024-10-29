@@ -26,8 +26,10 @@ using Lykke.SlackNotification.AzureQueue;
 using Lykke.Snow.Common.Correlation;
 using Lykke.Snow.Common.Startup.Hosting;
 using Lykke.Snow.Common.Startup.Log;
-using MarginTrading.SettingsService.Contracts;
-using MarginTrading.SettingsService.Contracts.Candles;
+
+using MarginTrading.AssetService.Contracts;
+using MarginTrading.AssetService.Contracts.Candles;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
