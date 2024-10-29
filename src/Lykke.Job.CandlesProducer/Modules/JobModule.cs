@@ -21,7 +21,6 @@ using Lykke.Job.CandlesProducer.Services.Quotes;
 using Lykke.Job.CandlesProducer.Settings;
 using Lykke.SettingsReader;
 using Microsoft.Extensions.DependencyInjection;
-using MarginTrading.SettingsService.Contracts;
 using Lykke.HttpClientGenerator;
 using Lykke.Job.CandlesProducer.Services.Helpers;
 using Lykke.Job.CandlesProducer.SqlRepositories;
@@ -29,6 +28,12 @@ using Lykke.Service.Assets.Client.Custom;
 using AssetsSettings = Lykke.Job.CandlesProducer.Settings.AssetsSettings;
 using Lykke.Middlewares.Mappers;
 using Lykke.RabbitMqBroker;
+using Lykke.RabbitMqBroker.Subscriber;
+using Lykke.RabbitMqBroker.Subscriber.Middleware.ErrorHandling;
+
+using MarginTrading.AssetService.Contracts;
+
+using Microsoft.Extensions.Logging;
 
 namespace Lykke.Job.CandlesProducer.Modules
 {
