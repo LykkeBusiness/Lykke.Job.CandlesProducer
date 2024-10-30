@@ -15,7 +15,7 @@
     <PackageVersion Include="LykkeBiz.Logs.MsSql" Version="4.0.0" />
     <PackageVersion Include="LykkeBiz.Logs.Serilog" Version="3.3.3" />
     <PackageVersion Include="LykkeBiz.Logs" Version="10.0.0" />
-    <PackageVersion Include="Lykke.MarginTrading.AssetService.Contracts" Version="13.0.2" />
+    <PackageVersion Include="Lykke.MarginTrading.AssetService.Contracts" Version="13.1.0" />
     <PackageVersion Include="Lykke.Middlewares" Version="3.6.3" />
     <PackageVersion Include="Lykke.Service.Assets.Client" Version="1.0.17" />
     <PackageVersion Include="Lykke.SlackNotification.AzureQueue" Version="2.0.5" />
