@@ -23,10 +23,10 @@
       <PackageVersion Include="Lykke.Snow.Common.Startup" Version="4.0.0" />
     <PackageVersion Include="Lykke.Snow.Common" Version="4.0.2" />
     <PackageVersion Include="LykkeBiz.HttpClientGenerator" Version="6.0.0" />
-    <PackageVersion Include="LykkeBiz.RabbitMqBroker" Version="15.4.0" />
+    <PackageVersion Include="LykkeBiz.RabbitMqBroker" Version="16.0.0" />
     <PackageVersion Include="LykkeBiz.SettingsReader" Version="9.0.0" />
     <PackageVersion Include="LykkeBiz.Snow.Cqrs" Version="5.1.0" />
-    <PackageVersion Include="MessagePack" Version="1.9.11" />
+    <PackageVersion Include="MessagePack" Version="2.5.187" />
     <PackageVersion Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.7" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
