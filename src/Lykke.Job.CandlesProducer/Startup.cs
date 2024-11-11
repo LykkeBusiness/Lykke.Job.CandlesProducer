@@ -23,6 +23,7 @@ using Lykke.Logs.Serilog;
 using Lykke.Middlewares;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
+using Lykke.Snow.Common.AssemblyLogging;
 using Lykke.Snow.Common.Correlation;
 using Lykke.Snow.Common.Startup.Hosting;
 using Lykke.Snow.Common.Startup.Log;
@@ -65,6 +66,7 @@ namespace Lykke.Job.CandlesProducer
         [UsedImplicitly]
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAssemblyLogger();
             services
                 .AddControllers()
                 .AddNewtonsoftJson(options =>
@@ -195,7 +197,7 @@ namespace Lykke.Job.CandlesProducer
                 var startupManager = ApplicationContainer.Resolve<IStartupManager>();
 
                 await startupManager.StartAsync();
-
+                
                 Program.AppHost.WriteLogs(Environment, Log);
 
                 await Log.WriteMonitorAsync("", "", "Started");
