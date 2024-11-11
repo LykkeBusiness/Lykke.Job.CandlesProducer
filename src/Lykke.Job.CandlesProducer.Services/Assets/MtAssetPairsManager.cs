@@ -10,7 +10,8 @@ using Common;
 using Common.Log;
 using Lykke.Job.CandlesProducer.Core.Services.Assets;
 using Lykke.Service.Assets.Client.Custom;
-using MarginTrading.SettingsService.Contracts;
+
+using MarginTrading.AssetService.Contracts;
 
 namespace Lykke.Job.CandlesProducer.Services.Assets
 {

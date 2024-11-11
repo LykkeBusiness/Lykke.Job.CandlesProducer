@@ -25,7 +25,6 @@
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" />
     <PackageReference Include="Lykke.MarginTrading.CorporateActions.Broker.Contracts" />
-    <PackageReference Include="Lykke.MarginTrading.SettingsService.Contracts" />
     <PackageReference Include="Lykke.Middlewares" />
     <PackageReference Include="Lykke.SlackNotification.AzureQueue" />
     <PackageReference Include="Lykke.Snow.Common.Startup" />

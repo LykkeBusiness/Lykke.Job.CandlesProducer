@@ -9,24 +9,23 @@
     <PackageVersion Include="coverlet.msbuild" Version="6.0.2" />
     <PackageVersion Include="Dapper" Version="2.0.123" />
     <PackageVersion Include="Lykke.AzureStorage" Version="8.13.4" />
-    <PackageVersion Include="Lykke.MarginTrading.CorporateActions.Broker.Contracts" Version="1.9.3" />
+    <PackageVersion Include="Lykke.MarginTrading.CorporateActions.Broker.Contracts" Version="1.10.0" />
     <PackageVersion Include="LykkeBiz.Common" Version="8.3.0" />
     <PackageVersion Include="Lykke.Job.QuotesProducer.Contract" Version="1.0.0" />
     <PackageVersion Include="LykkeBiz.Logs.MsSql" Version="4.0.0" />
     <PackageVersion Include="LykkeBiz.Logs.Serilog" Version="3.3.3" />
     <PackageVersion Include="LykkeBiz.Logs" Version="10.0.0" />
-    <PackageVersion Include="Lykke.MarginTrading.SettingsService.Contracts" Version="1.5.0" />
+    <PackageVersion Include="Lykke.MarginTrading.AssetService.Contracts" Version="13.1.0" />
     <PackageVersion Include="Lykke.Middlewares" Version="3.6.3" />
     <PackageVersion Include="Lykke.Service.Assets.Client" Version="1.0.17" />
     <PackageVersion Include="Lykke.SlackNotification.AzureQueue" Version="2.0.5" />
-    <PackageVersion Include="Lykke.Snow.Common" Version="4.0.3" />
-      <PackageVersion Include="Lykke.Snow.Common.Startup" Version="4.0.0" />
-    <PackageVersion Include="Lykke.Snow.Common" Version="4.0.2" />
-    <PackageVersion Include="LykkeBiz.HttpClientGenerator" Version="6.0.0" />
-    <PackageVersion Include="LykkeBiz.RabbitMqBroker" Version="15.4.0" />
-    <PackageVersion Include="LykkeBiz.SettingsReader" Version="9.0.0" />
-    <PackageVersion Include="LykkeBiz.Snow.Cqrs" Version="5.1.0" />
-    <PackageVersion Include="MessagePack" Version="1.9.11" />
+    <PackageVersion Include="Lykke.Snow.Common.Startup" Version="4.1.0" />
+    <PackageVersion Include="Lykke.Snow.Common" Version="5.0.1" />
+    <PackageVersion Include="LykkeBiz.HttpClientGenerator" Version="6.2.0" />
+    <PackageVersion Include="LykkeBiz.RabbitMqBroker" Version="16.0.0" />
+    <PackageVersion Include="LykkeBiz.SettingsReader" Version="9.0.1" />
+    <PackageVersion Include="LykkeBiz.Snow.Cqrs" Version="7.0.1" />
+    <PackageVersion Include="MessagePack" Version="2.5.187" />
     <PackageVersion Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.7" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
