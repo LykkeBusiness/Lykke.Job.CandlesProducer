@@ -22,6 +22,7 @@ using Lykke.Logs.MsSql.Repositories;
 using Lykke.Logs.Serilog;
 using Lykke.Middlewares;
 using Lykke.SettingsReader;
+using Lykke.SettingsReader.SettingsTemplate;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.Snow.Common.AssemblyLogging;
 using Lykke.Snow.Common.Correlation;
@@ -45,7 +46,7 @@ namespace Lykke.Job.CandlesProducer
     public class Startup
     {
         private IReloadingManager<AppSettings> _mtSettingsManager;
-        
+
         private CandlesProducerSettingsContract _candlesProducerSettings;
         private IWebHostEnvironment Environment { get; set; }
         private ILifetimeScope ApplicationContainer { get; set; }
@@ -79,9 +80,9 @@ namespace Lykke.Job.CandlesProducer
             {
                 options.SwaggerDoc("v1", new OpenApiInfo{Title = "CandlesProducer API", Version = "v1"});
             });
-            
+
             LoadConfiguration();
-            
+
             Log = CreateLog(
                 Configuration,
                 services,
@@ -91,6 +92,7 @@ namespace Lykke.Job.CandlesProducer
             services.AddCorrelation();
 
             services.AddApplicationInsightsTelemetry();
+            services.AddSettingsTemplateGenerator();
         }
 
         private void LoadConfiguration()
@@ -120,20 +122,20 @@ namespace Lykke.Job.CandlesProducer
             var quotesSourceType = _mtSettingsManager.CurrentValue.CandlesProducerJob != null
                 ? QuotesSourceType.Spot
                 : QuotesSourceType.Mt;
-            
-            var jobSettings = quotesSourceType == QuotesSourceType.Spot 
-                ? _mtSettingsManager.Nested(x => x.CandlesProducerJob) 
+
+            var jobSettings = quotesSourceType == QuotesSourceType.Spot
+                ? _mtSettingsManager.Nested(x => x.CandlesProducerJob)
                 : _mtSettingsManager.Nested(x => x.MtCandlesProducerJob);
-            
+
             builder.RegisterModule(new JobModule(
-                jobSettings.CurrentValue, 
-                jobSettings.Nested(x => x.Db), 
+                jobSettings.CurrentValue,
+                jobSettings.Nested(x => x.Db),
                 _mtSettingsManager.CurrentValue.Assets,
-                quotesSourceType, 
+                quotesSourceType,
                 Log));
-            
+
             builder.RegisterModule(new CandlePublishersModule(
-                jobSettings.CurrentValue.Rabbit.CandlesPublication, 
+                jobSettings.CurrentValue.Rabbit.CandlesPublication,
                 _candlesProducerSettings));
 
             builder.RegisterModule(new CqrsModule(jobSettings.CurrentValue.Cqrs));
@@ -148,12 +150,12 @@ namespace Lykke.Job.CandlesProducer
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime appLifetime)
         {
             ApplicationContainer = app.ApplicationServices.GetAutofacRoot();
-            
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+
             app.Use(async (context, next) =>
             {
                 context.Request.EnableBuffering();
@@ -166,10 +168,11 @@ namespace Lykke.Job.CandlesProducer
             app.UseRouting();
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();
+                endpoints.MapSettingsTemplate();
             });
             app.UseSwagger(c =>
             {
-                c.PreSerializeFilters.Add((swagger, httpReq) => 
+                c.PreSerializeFilters.Add((swagger, httpReq) =>
                     swagger.Servers =
                         new List<OpenApiServer>
                         {
@@ -197,7 +200,7 @@ namespace Lykke.Job.CandlesProducer
                 var startupManager = ApplicationContainer.Resolve<IStartupManager>();
 
                 await startupManager.StartAsync();
-                
+
                 Program.AppHost.WriteLogs(Environment, Log);
 
                 await Log.WriteMonitorAsync("", "", "Started");
@@ -246,7 +249,7 @@ namespace Lykke.Job.CandlesProducer
             }
         }
 
-        private static ILog CreateLog(IConfiguration configuration, IServiceCollection services, 
+        private static ILog CreateLog(IConfiguration configuration, IServiceCollection services,
             IReloadingManager<AppSettings> settings)
         {
             var tableName = "CandlesProducerServiceLog";
@@ -262,7 +265,7 @@ namespace Lykke.Job.CandlesProducer
             else if (settings.CurrentValue.MtCandlesProducerJob.Db.StorageMode == StorageMode.SqlServer)
             {
                 aggregateLogger.AddLog(
-                    new LogToSql(new SqlLogRepository(tableName, 
+                    new LogToSql(new SqlLogRepository(tableName,
                         settings.CurrentValue.MtCandlesProducerJob.Db.LogsConnString)));
             }
             else if (settings.CurrentValue.MtCandlesProducerJob.Db.StorageMode == StorageMode.Azure)
