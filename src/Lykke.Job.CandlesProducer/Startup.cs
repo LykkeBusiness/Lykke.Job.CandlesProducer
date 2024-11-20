@@ -168,7 +168,7 @@ namespace Lykke.Job.CandlesProducer
             app.UseRouting();
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();
-                endpoints.AddSettingsTemplateEndpoint();
+                endpoints.MapSettingsTemplate();
             });
             app.UseSwagger(c =>
             {
