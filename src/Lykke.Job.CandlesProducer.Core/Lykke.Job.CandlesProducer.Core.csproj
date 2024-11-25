@@ -11,11 +11,7 @@
     <PackageReference Include="Lykke.Service.Assets.Client" />
     <PackageReference Include="LykkeBiz.RabbitMqBroker" />
     <PackageReference Include="LykkeBiz.SettingsReader" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference
-      Include="..\..\contract\Lykke.Job.CandlesProducer.Contract\Lykke.Job.CandlesProducer.Contract.csproj" />
+    <PackageReference Include="Lykke.Job.CandlesProducer.Contract" />
   </ItemGroup>
 
 </Project>
