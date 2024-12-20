@@ -12,6 +12,7 @@ using Lykke.Job.CandlesProducer.Core.Domain.Candles;
 using Lykke.Job.CandlesProducer.Core.Services;
 using Lykke.Job.CandlesProducer.Core.Services.Assets;
 using Lykke.Job.CandlesProducer.Core.Services.Candles;
+using Lykke.Snow.Common.Startup.Filters;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -49,6 +50,7 @@ public class CandlesController : ControllerBase, ICandlesApi
     }
 
     [HttpPost]
+    [ServiceFilter(typeof(DevelopmentEnvironmentFilter))]
     public async Task<ErrorCodeResponse<CandlesErrorCodesContract>> UpsertCandle([FromBody] UpsertCandleRequest request)
     {
         var validationResult = await Validate(request);
