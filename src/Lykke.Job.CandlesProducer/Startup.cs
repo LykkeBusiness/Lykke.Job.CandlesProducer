@@ -26,6 +26,7 @@ using Lykke.SettingsReader.SettingsTemplate;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.Snow.Common.AssemblyLogging;
 using Lykke.Snow.Common.Correlation;
+using Lykke.Snow.Common.Startup.Filters;
 using Lykke.Snow.Common.Startup.Hosting;
 using Lykke.Snow.Common.Startup.Log;
 
@@ -39,6 +40,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+
+using Newtonsoft.Json.Converters;
 
 namespace Lykke.Job.CandlesProducer
 {
@@ -74,6 +77,7 @@ namespace Lykke.Job.CandlesProducer
                 {
                     options.SerializerSettings.ContractResolver =
                         new Newtonsoft.Json.Serialization.DefaultContractResolver();
+                    options.SerializerSettings.Converters.Add(new StringEnumConverter());
                 });
 
             services.AddSwaggerGen(options =>
@@ -88,6 +92,7 @@ namespace Lykke.Job.CandlesProducer
                 services,
                 _mtSettingsManager);
 
+            services.AddScoped<DevelopmentEnvironmentFilter>();
             services.AddSingleton<ILoggerFactory>(x => new WebHostLoggerFactory(Log));
             services.AddCorrelation();
 
