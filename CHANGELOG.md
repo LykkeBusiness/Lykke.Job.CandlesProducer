@@ -1,3 +1,14 @@
+## 2.11.0 - Nova 2. Delivery 48 (December 20, 2024)
+### What's changed
+* LT-5923: Update refit to 8.x version.
+* LT-5879: Keep schema for appsettings.json up to date.
+* LT-5689: Add api for updating in-memory candles.
+
+### Deployment
+New internal API endpoints added which are NOT required to be exposed to FE:
+* `GET /api/candles/{productId}`
+* `POST /api/candles`
+
 ## 2.10.0 - Nova 2. Delivery 47 (November 15, 2024)
 ### What's changed
 * LT-5854: Update messagepack to 2.x version.
