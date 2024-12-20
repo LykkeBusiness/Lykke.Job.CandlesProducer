@@ -26,6 +26,7 @@ using Lykke.SettingsReader.SettingsTemplate;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.Snow.Common.AssemblyLogging;
 using Lykke.Snow.Common.Correlation;
+using Lykke.Snow.Common.Startup.Filters;
 using Lykke.Snow.Common.Startup.Hosting;
 using Lykke.Snow.Common.Startup.Log;
 
@@ -91,6 +92,7 @@ namespace Lykke.Job.CandlesProducer
                 services,
                 _mtSettingsManager);
 
+            services.AddScoped<DevelopmentEnvironmentFilter>();
             services.AddSingleton<ILoggerFactory>(x => new WebHostLoggerFactory(Log));
             services.AddCorrelation();
 
