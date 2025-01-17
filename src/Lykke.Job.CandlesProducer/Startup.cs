@@ -92,7 +92,7 @@ namespace Lykke.Job.CandlesProducer
                 services,
                 _mtSettingsManager);
 
-            services.AddScoped<DevelopmentEnvironmentFilter>();
+            services.AddDevelopmentServiceFilter();
             services.AddSingleton<ILoggerFactory>(x => new WebHostLoggerFactory(Log));
             services.AddCorrelation();
 
